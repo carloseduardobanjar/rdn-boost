@@ -3,7 +3,7 @@ Universe                = vanilla
 
 # Transferência de arquivos: Essencial para levar o venv e o código
 should_transfer_files   = YES
-transfer_input_files    = run_rdn_cv.py, dataset/, /home/users/cschuller/my-envs/projeto_rdn/
+transfer_input_files = run_rdn_cv.py, dataset/, projeto_rdn.tar.gz
 
 # Organização de Saídas e Logs 
 # Certifique-se de que estas pastas existam na Zeus antes de submeter
