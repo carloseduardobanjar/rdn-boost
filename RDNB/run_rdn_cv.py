@@ -3,15 +3,20 @@
 import os
 import sys
 
-venv_path = os.path.join(os.getcwd(), "projeto_rdn")
-activate_this = os.path.join(venv_path, "bin/activate_this.py")
+# Nome da pasta do ambiente que será descompactada no nó
+venv_name = "projeto_rdn"
+venv_path = os.path.join(os.getcwd(), venv_name)
 
-if os.path.exists(activate_this):
-    with open(activate_this) as f:
-        code = compile(f.read(), activate_this, 'exec')
-        exec(code, dict(__file__=activate_this))
+if os.path.exists(venv_path):
+    # Encontra o diretório site-packages dentro do ambiente descompactado
+    # O caminho padrão para Python 3.8 é lib/python3.8/site-packages
+    site_packages = os.path.join(venv_path, "lib", "python3.8", "site-packages")
+    if os.path.exists(site_packages):
+        sys.path.insert(0, site_packages)
+    else:
+        print(f"Aviso: site-packages não encontrado em {site_packages}")
 else:
-    print("Aviso: activate_this.py não encontrado no diretório local. Usando ambiente global.")
+    print(f"Aviso: Pasta {venv_name} não encontrada. Usando ambiente global.")
 
 import os
 import argparse
