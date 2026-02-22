@@ -1,3 +1,18 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+
+venv_path = os.path.join(os.getcwd(), "projeto_rdn")
+activate_this = os.path.join(venv_path, "bin/activate_this.py")
+
+if os.path.exists(activate_this):
+    with open(activate_this) as f:
+        code = compile(f.read(), activate_this, 'exec')
+        exec(code, dict(__file__=activate_this))
+else:
+    print("Aviso: activate_this.py não encontrado no diretório local. Usando ambiente global.")
+
 import os
 import argparse
 import shutil
