@@ -1,20 +1,20 @@
 Executable              = run_pipeline.sh
 Universe                = vanilla
 
-# Arquivos necessários para a execução
+# Transferência de arquivos: Essencial para levar o venv e o código
 should_transfer_files   = YES
-transfer_input_files    = run_rdn_cv.py, dataset/
+transfer_input_files    = run_rdn_cv.py, dataset/, /home/users/cschuller/my-envs/projeto_rdn/
 
-# Organização de logs (crie as pastas 'log', 'out' e 'err' na Zeus antes)
-Log                     = log/job_$(depth)_$(node)_$(trees).log
-Output                  = out/job_$(depth)_$(node)_$(trees).out
-Error                   = err/job_$(depth)_$(node)_$(trees).err
+# Organização de Saídas e Logs 
+# Certifique-se de que estas pastas existam na Zeus antes de submeter
+Log                     = log/exp_$(depth)_$(node)_$(trees).log 
+Output                  = out/exp_$(depth)_$(node)_$(trees).out 
+Error                   = err/exp_$(depth)_$(node)_$(trees).err 
 
-# O que será devolvido para a Zeus
+# Retorno dos resultados para a Zeus
 when_to_transfer_output = ON_EXIT
 
-# Definição dos parâmetros do Grid Search
-# O Condor chamará o script passando estes argumentos
+# Variáveis do seu Grid Search
 Arguments = $(depth) $(node) $(trees)
 
 # Lista de combinações (O Condor criará um job para cada linha)
