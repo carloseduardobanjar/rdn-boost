@@ -20,21 +20,4 @@ Arguments = $(depth) $(node) $(trees)
 # Lista de combinações (O Condor criará um job para cada linha)
 Queue depth,node,trees from (
     4 3 50
-    4 3 100
-    4 3 150
-    4 5 50
-    4 5 100
-    4 5 150
-    5 3 50
-    5 3 100
-    5 3 150
-    5 5 50
-    5 5 100
-    5 5 150
-    6 3 50
-    6 3 100
-    6 3 150
-    6 5 50
-    6 5 100
-    6 5 150
 )
