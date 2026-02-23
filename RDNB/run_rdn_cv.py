@@ -3,6 +3,7 @@
 import os
 import sys
 
+print(f"Iniciando script python com caminho")
 # Nome da pasta do ambiente que será descompactada no nó
 venv_name = "projeto_rdn"
 venv_path = os.path.join(os.getcwd(), venv_name)
@@ -17,6 +18,7 @@ if os.path.exists(venv_path):
         print(f"Aviso: site-packages não encontrado em {site_packages}")
 else:
     print(f"Aviso: Pasta {venv_name} não encontrada. Usando ambiente global.")
+print(f"Caminho do ambiente virtual adicionado: {venv_path}")
 
 import os
 import argparse
@@ -106,6 +108,14 @@ def main():
                         help="Number of boosting trees")
 
     args = parser.parse_args()
+
+    print("Configurações:")
+    print(f"Data path: {args.data_path}")
+    print(f"Output path: {args.output_path}")
+    print(f"Folds: {args.folds}")
+    print(f"Max tree depth: {args.max_depth}")
+    print(f"Node size: {args.node_size}")
+    print(f"Number of estimators: {args.n_estimators}")
 
     base_path = args.data_path
     folds = [f"fold{i:02d}" for i in range(1, args.folds + 1)]
