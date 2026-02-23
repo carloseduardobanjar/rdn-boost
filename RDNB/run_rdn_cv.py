@@ -143,13 +143,19 @@ def main():
             n_estimators=args.n_estimators,
         )
 
+        print("\nTreinando modelo BoostSRL...")
+
         clf.fit(train_db)
+
+        print("Realizando predições no conjunto de teste...")
 
         probs = clf.predict_proba(test_db)
 
         # =============================
         # Salvar modelo BoostSRL
         # =============================
+
+        print("\nSalvando modelo BoostSRL...")
 
         data_dir = Path(clf.file_system.files.DIRECTORY)
         save_dir = save_root / f"fold_{i+1}"
