@@ -1,17 +1,19 @@
-executable = run.sh
-# O log ajuda-te a ver se houve erro de memória ou permissão
-log    = logs/job_$(depth)_$(size)_$(est).log
+executable = /home/users/cschuller/rdn-boost/experimentos_land/run.sh
+initialdir = /home/users/cschuller/rdn-boost/experimentos_land
+
+# Use caminhos relativos ao initialdir para facilitar
 output = logs/job_$(depth)_$(size)_$(est).out
 error  = logs/job_$(depth)_$(size)_$(est).err
+log    = logs/job_$(depth)_$(size)_$(est).log
 
-# Passa os argumentos para o run.sh que os repassa para o python
+# Importante adicionar isso:
+getenv = True
+
 arguments = --max_depth $(depth) --node_size $(size) --n_estimators $(est) --data_path ./dataset --output_path ./output/res_d$(depth)_s$(size)_e$(est)
 
-# Recursos (Manual recomenda não pedir em excesso para não travar a fila)
 request_cpus = 1
 request_memory = 2GB
 
-# Definição do Grid Search
 queue depth, size, est from (
     3, 2, 5
 )
