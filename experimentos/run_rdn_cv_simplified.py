@@ -101,7 +101,7 @@ def main():
     folds = [f"fold{i:02d}" for i in range(1, args.folds + 1)]
 
     save_root = Path(args.output_path)
-    save_root.mkdir(exist_ok=True)
+    save_root.mkdir(parents=True, exist_ok=True)
 
     global TMP_DIR
 
