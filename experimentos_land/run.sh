@@ -1,7 +1,7 @@
 #!/bin/bash
-# Ativa o venv usando o caminho completo
-source /home/users/cschuller/rdn-boost/venv_land/bin/activate
 
-# Executa o Python usando o caminho completo para o script
-# E repassa todos os argumentos com "$@"
+# O venv está na home
+source /home/users/cschuller/venv_land/bin/activate
+
+# O script python está dentro de rdn-boost/experimentos_land
 python3 /home/users/cschuller/rdn-boost/experimentos_land/run_rdn_cv_simplified.py "$@"
