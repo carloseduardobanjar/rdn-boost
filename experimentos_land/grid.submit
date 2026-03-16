@@ -9,7 +9,7 @@ log    = logs/job_$(depth)_$(size)_$(est).log
 # Importante adicionar isso:
 getenv = True
 
-arguments = --max_depth $(depth) --node_size $(size) --n_estimators $(est) --data_path ./dataset --output_path ./output/res_d$(depth)_s$(size)_e$(est)
+arguments = --max_depth $(depth) --node_size $(size) --n_estimators $(est) --data_path /home/users/cschuller/rdn-boost/experimentos_land/dataset --output_path /home/users/cschuller/rdn-boost/experimentos_land/output/res_d$(depth)_s$(size)_e$(est)
 
 request_cpus = 1
 request_memory = 2GB
