@@ -1,4 +1,7 @@
 #!/bin/bash
-# Caminho absoluto para o TEU venv (ajusta 'teu_usuario')
-source /home/users/cschuller/venv_land/bin/activate
-python3 run_rdn_cv_simplified.py "$@"
+# Ativa o venv usando o caminho completo
+source /home/cschuller/rdn-boost/venv_land/bin/activate
+
+# Executa o Python usando o caminho completo para o script
+# E repassa todos os argumentos com "$@"
+python3 /home/cschuller/rdn-boost/experimentos_land/run_rdn_cv_simplified.py "$@"
