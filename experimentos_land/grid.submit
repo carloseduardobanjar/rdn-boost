@@ -15,6 +15,5 @@ request_cpus = 1
 request_memory = 2GB
 
 queue depth, size, est from (
-    3, 2, 5
-    3, 2, 20
+    5, 2, 50
 )

@@ -3,7 +3,7 @@ import argparse
 import random
 
 
-def generate_balanced_dataset(num_instances=1000, start_index=1):
+def generate_balanced_dataset(num_instances=1000, start_index=1, missing_attacker_prob=0.0):
 
     facts = ["% --- Background Knowledge ---"]
     pos = ["% --- Positive Examples ---"]
@@ -63,7 +63,11 @@ def generate_balanced_dataset(num_instances=1000, start_index=1):
         # ================= POSITIVE =================
         if is_positive:
 
-            facts.append(f"attackerLocated({zone}).")
+            missing_attacker = random.random() < missing_attacker_prob
+
+            if not missing_attacker:
+                facts.append(f"attackerLocated({zone}).")
+
             facts.append(f"hacl({zone}, {ws}, {protocol}, {port}).")
             facts.append(f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv}).")
             facts.append(f"vulExists({ws}, '{cve}', {service}).")
@@ -200,6 +204,8 @@ def main():
     parser.add_argument("--folds", type=int, required=True)
     parser.add_argument("--instances", type=int, required=True)
     parser.add_argument("--output", type=str, required=True)
+    parser.add_argument("--missing_attacker_prob", type=float, default=0.0,
+                    help="Probabilidade de omitir attackerLocated em exemplos positivos")
 
     args = parser.parse_args()
 
@@ -211,7 +217,8 @@ def main():
 
         facts, pos, neg = generate_balanced_dataset(
             num_instances=args.instances,
-            start_index=current_index
+            start_index=current_index,
+            missing_attacker_prob=args.missing_attacker_prob
         )
 
         save_fold(args.output, fold, facts, pos, neg)
