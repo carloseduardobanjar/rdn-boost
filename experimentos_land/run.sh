@@ -1,13 +1,18 @@
 #!/bin/bash
 
-# Vai para a pasta do experimento
+echo "==== INÍCIO ===="
+date
+echo "Args: $@"
+
 cd /home/users/cschuller/rdn-boost/experimentos_land
 
-# Garante que a pasta output exista
-mkdir -p output
+rm -rf output
+mkdir output
+chmod 777 output
 
-# Ativa o venv
 source /home/users/cschuller/venv_land/bin/activate
 
-# Roda o python usando caminhos absolutos para não ter erro
-python3 /home/users/cschuller/rdn-boost/experimentos_land/run_rdn_cv_simplified.py "$@"
+python3 -u /home/users/cschuller/rdn-boost/experimentos_land/run_rdn_cv_simplified.py "$@"
+
+echo "==== FIM ===="
+date
