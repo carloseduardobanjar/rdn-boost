@@ -6,9 +6,6 @@ output = logs/job_$(depth)_$(size)_$(est).out
 error  = logs/job_$(depth)_$(size)_$(est).err
 log    = logs/job_$(depth)_$(size)_$(est).log
 
-# Importante adicionar isso:
-getenv = True
-
 arguments = --max_depth $(depth) --node_size $(size) --n_estimators $(est) --data_path /home/users/cschuller/rdn-boost/experimentos_land/dataset --output_path /home/users/cschuller/rdn-boost/experimentos_land/output/res_d$(depth)_s$(size)_e$(est)
 
 request_cpus = 1
