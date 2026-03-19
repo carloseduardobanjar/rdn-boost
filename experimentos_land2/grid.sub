@@ -1,0 +1,16 @@
+executable = /home/users/cschuller/rdn-boost/experimentos_land2/run.sh
+initialdir = /home/users/cschuller/rdn-boost/experimentos_land2
+
+# Use caminhos relativos ao initialdir para facilitar
+output = logs/job_$(depth)_$(size)_$(est).out
+error  = logs/job_$(depth)_$(size)_$(est).err
+log    = logs/job_$(depth)_$(size)_$(est).log
+
+arguments = --max_depth $(depth) --node_size $(size) --n_estimators $(est) --data_path /home/users/cschuller/rdn-boost/experimentos_land2/dataset --output_path /home/users/cschuller/rdn-boost/experimentos_land2/output/res_d$(depth)_s$(size)_e$(est)
+
+request_cpus = 1
+request_memory = 2GB
+
+queue depth, size, est from (
+    5, 2, 50
+)
