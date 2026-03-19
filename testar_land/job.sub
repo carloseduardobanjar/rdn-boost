@@ -1,0 +1,11 @@
+executable = test.sh
+
+output = job.out
+error  = job.err
+log    = job.log
+
+request_cpus = 1
+request_memory = 512MB
+request_disk = 1MB
+
+queue
