@@ -6,7 +6,7 @@ echo "Args: $@"
 
 cd /home/users/cschuller/rdn-boost/experimentos_land2
 
-source /home/users/cschuller/venv_land/bin/activate
+source /home/users/cschuller/ambiente_land/bin/activate
 
 export BSRL_DATA_DIR=/home/users/cschuller/tmp/bsrl_data
 mkdir -p $BSRL_DATA_DIR
