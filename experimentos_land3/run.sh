@@ -6,7 +6,7 @@ echo "Args: $@"
 
 cd /home/users/cschuller/rdn-boost/experimentos_land3
 
-source /home/users/cschuller/novo_venv/bin/activate
+source /home/users/cschuller/ambiente_land/bin/activate
 
 python3 -u /home/users/cschuller/rdn-boost/experimentos_land3/run_rdn_cv_simplified.py "$@"
 
