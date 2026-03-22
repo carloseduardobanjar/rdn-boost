@@ -13,7 +13,7 @@ when_to_transfer_output = ON_EXIT
 transfer_output_files = results_$(depth)_$(size)_$(est)
 
 request_cpus = 1
-request_memory = 10240
+request_memory = 2048
 environment = "PYTHONUNBUFFERED=1"
 
 queue depth, size, est from (
