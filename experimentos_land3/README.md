@@ -29,7 +29,7 @@ Execute o script generate_folds.py para gerar os folds utilizados nas simulaçõ
 
 Para começar, recomendo:
 ```bash
-python generate_folds.py --folds 5 --instances 50 --output dataset
+python generate_folds.py --folds 5 --instances 200 --output dataset --missing_attacker_prob 0.2
 ```
 
 Os datasets serão criados dentro do diretório dataset/.
