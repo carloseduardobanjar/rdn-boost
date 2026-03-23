@@ -3,8 +3,13 @@ import argparse
 import random
 
 
-def generate_balanced_dataset(num_instances=1000, start_index=1, missing_attacker_prob=0.0):
-
+def generate_balanced_dataset(
+    num_instances=1000,
+    start_index=1,
+    missing_attacker_prob=0.2,
+    missing_vulexists_prob=0.2,
+    missing_vulproperty_prob=0.05
+):
     facts = ["% --- Background Knowledge ---"]
     pos = ["% --- Positive Examples ---"]
     neg = ["% --- Negative Examples ---"]
@@ -45,7 +50,6 @@ def generate_balanced_dataset(num_instances=1000, start_index=1, missing_attacke
     end_index = start_index + num_instances
 
     for i in range(start_index, end_index):
-
         ws = f"webServer_{i}"
         zone = f"internet_{i}"
         unknown_zone = f"unknown_zone_{i}"
@@ -62,22 +66,28 @@ def generate_balanced_dataset(num_instances=1000, start_index=1, missing_attacke
 
         # ================= POSITIVE =================
         if is_positive:
-
             missing_attacker = random.random() < missing_attacker_prob
+            missing_vulexists = random.random() < missing_vulexists_prob
+            missing_vulproperty = random.random() < missing_vulproperty_prob
 
             if not missing_attacker:
                 facts.append(f"attackerLocated({zone}).")
 
             facts.append(f"hacl({zone}, {ws}, {protocol}, {port}).")
-            facts.append(f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv}).")
-            facts.append(f"vulExists({ws}, '{cve}', {service}).")
-            facts.append(f"vulProperty('{cve}', remoteExploit, privEscalation).")
+            facts.append(
+                f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv})."
+            )
+
+            if not missing_vulexists:
+                facts.append(f"vulExists({ws}, '{cve}', {service}).")
+
+            if not missing_vulproperty:
+                facts.append(f"vulProperty('{cve}', remoteExploit, privEscalation).")
 
             pos.append(f"execCode({ws}, {service_priv}).")
 
         # ================= NEGATIVE =================
         else:
-
             failure_type = random.randint(1, 10)
 
             if failure_type == 1:
@@ -103,7 +113,9 @@ def generate_balanced_dataset(num_instances=1000, start_index=1, missing_attacke
 
                 facts.append(f"attackerLocated({zone}).")
                 facts.append(f"hacl({zone}, {ws}, {protocol}, {port}).")
-                facts.append(f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv}).")
+                facts.append(
+                    f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv})."
+                )
                 facts.append(f"vulExists({ws}, '{wrong_cve}', {other_service}).")
 
                 neg.append(f"execCode({ws}, {service_priv}).")
@@ -112,7 +124,9 @@ def generate_balanced_dataset(num_instances=1000, start_index=1, missing_attacke
             elif failure_type == 6:
                 facts.append(f"attackerLocated({zone}).")
                 facts.append(f"hacl({zone}, {ws}, {protocol}, {port}).")
-                facts.append(f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv}).")
+                facts.append(
+                    f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv})."
+                )
                 facts.append(f"vulExists({ws}, 'CVE-LOCAL-{i}', {service}).")
                 facts.append(f"vulProperty('CVE-LOCAL-{i}', localExploit, privEscalation).")
 
@@ -124,7 +138,9 @@ def generate_balanced_dataset(num_instances=1000, start_index=1, missing_attacke
 
                 facts.append(f"attackerLocated({zone}).")
                 facts.append(f"hacl({zone}, {ws}, {protocol}, {port}).")
-                facts.append(f"networkServiceInfo({ws}, {service}, {protocol}, {wrong_port}, {service_priv}).")
+                facts.append(
+                    f"networkServiceInfo({ws}, {service}, {protocol}, {wrong_port}, {service_priv})."
+                )
                 facts.append(f"vulExists({ws}, '{cve}', {service}).")
                 facts.append(f"vulProperty('{cve}', remoteExploit, privEscalation).")
 
@@ -132,10 +148,11 @@ def generate_balanced_dataset(num_instances=1000, start_index=1, missing_attacke
                 continue
 
             elif failure_type == 8:
-
                 facts.append(f"attackerLocated({zone}).")
                 facts.append(f"hacl({zone}, {ws}, {protocol}, {port}).")
-                facts.append(f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv}).")
+                facts.append(
+                    f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv})."
+                )
                 facts.append(f"vulExists({ws}, '{cve}', {service}).")
                 facts.append(f"vulProperty('{cve}', remoteExploit, denialOfService).")
 
@@ -143,7 +160,6 @@ def generate_balanced_dataset(num_instances=1000, start_index=1, missing_attacke
                 continue
 
             elif failure_type == 9:
-
                 facts.append(f"attackerLocated({zone}).")
                 facts.append(f"hacl({zone}, {ws}, {protocol}, {port}).")
 
@@ -151,8 +167,12 @@ def generate_balanced_dataset(num_instances=1000, start_index=1, missing_attacke
                 other_port = random.choice(services[other_service]["ports"])
                 other_cve = random.choice(services[other_service]["cves"])
 
-                facts.append(f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv}).")
-                facts.append(f"networkServiceInfo({ws}, {other_service}, {protocol}, {other_port}, {services[other_service]['default_priv']}).")
+                facts.append(
+                    f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv})."
+                )
+                facts.append(
+                    f"networkServiceInfo({ws}, {other_service}, {protocol}, {other_port}, {services[other_service]['default_priv']})."
+                )
                 facts.append(f"vulExists({ws}, '{other_cve}', {other_service}).")
                 facts.append(f"vulProperty('{other_cve}', remoteExploit, privEscalation).")
 
@@ -160,10 +180,11 @@ def generate_balanced_dataset(num_instances=1000, start_index=1, missing_attacke
                 continue
 
             else:
-
                 facts.append(f"attackerLocated({zone}).")
                 facts.append(f"hacl({zone}, {ws}, {protocol}, {port}).")
-                facts.append(f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv}).")
+                facts.append(
+                    f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv})."
+                )
                 facts.append(f"vulExists({ws}, '{cve}', {service}).")
                 facts.append(f"vulProperty('{cve}', remoteExploit, privEscalation).")
 
@@ -171,7 +192,9 @@ def generate_balanced_dataset(num_instances=1000, start_index=1, missing_attacke
                 neg.append(f"execCode({ws}, {wrong_priv}).")
                 continue
 
-            facts.append(f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv}).")
+            facts.append(
+                f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv})."
+            )
             facts.append(f"vulExists({ws}, '{cve}', {service}).")
             facts.append(f"vulProperty('{cve}', remoteExploit, privEscalation).")
 
@@ -183,7 +206,6 @@ def generate_balanced_dataset(num_instances=1000, start_index=1, missing_attacke
 
 
 def save_fold(output_dir, fold_number, facts, pos, neg):
-
     fold_path = os.path.join(output_dir, f"fold{fold_number:02d}")
     os.makedirs(fold_path, exist_ok=True)
 
@@ -198,14 +220,32 @@ def save_fold(output_dir, fold_number, facts, pos, neg):
 
 
 def main():
-
     parser = argparse.ArgumentParser(description="Generate Direct Network relational dataset")
 
     parser.add_argument("--folds", type=int, required=True)
     parser.add_argument("--instances", type=int, required=True)
     parser.add_argument("--output", type=str, required=True)
-    parser.add_argument("--missing_attacker_prob", type=float, default=0.0,
-                    help="Probabilidade de omitir attackerLocated em exemplos positivos")
+
+    parser.add_argument(
+        "--missing_attacker_prob",
+        type=float,
+        default=0.0,
+        help="Probabilidade de omitir attackerLocated em exemplos positivos"
+    )
+
+    parser.add_argument(
+        "--missing_vulexists_prob",
+        type=float,
+        default=0.0,
+        help="Probabilidade de omitir vulExists em exemplos positivos"
+    )
+
+    parser.add_argument(
+        "--missing_vulproperty_prob",
+        type=float,
+        default=0.0,
+        help="Probabilidade de omitir vulProperty em exemplos positivos"
+    )
 
     args = parser.parse_args()
 
@@ -214,11 +254,12 @@ def main():
     current_index = 1
 
     for fold in range(1, args.folds + 1):
-
         facts, pos, neg = generate_balanced_dataset(
             num_instances=args.instances,
             start_index=current_index,
-            missing_attacker_prob=args.missing_attacker_prob
+            missing_attacker_prob=args.missing_attacker_prob,
+            missing_vulexists_prob=args.missing_vulexists_prob,
+            missing_vulproperty_prob=args.missing_vulproperty_prob
         )
 
         save_fold(args.output, fold, facts, pos, neg)
