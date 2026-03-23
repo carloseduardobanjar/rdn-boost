@@ -229,21 +229,21 @@ def main():
     parser.add_argument(
         "--missing_attacker_prob",
         type=float,
-        default=0.0,
+        default=0.2,
         help="Probabilidade de omitir attackerLocated em exemplos positivos"
     )
 
     parser.add_argument(
         "--missing_vulexists_prob",
         type=float,
-        default=0.0,
+        default=0.1,
         help="Probabilidade de omitir vulExists em exemplos positivos"
     )
 
     parser.add_argument(
         "--missing_vulproperty_prob",
         type=float,
-        default=0.0,
+        default=0.05,
         help="Probabilidade de omitir vulProperty em exemplos positivos"
     )
 
