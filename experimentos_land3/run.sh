@@ -2,7 +2,6 @@
 echo "==== INÍCIO ===="
 date
 
-# 1. Captura os argumentos
 MISS_PROB=$1
 D=$2
 S=$3
@@ -10,37 +9,38 @@ E=$4
 shift 4
 
 BASE_DIR="/home/users/cschuller/rdn-boost/experimentos_land3"
-cd $BASE_DIR
+ORIGINAL_VENV="/home/users/cschuller/ambiente_land"
 
-# 2. ISOLAMENTO DE AMBIENTE (O "Pulo do Gato")
-# Criamos um diretório único para este processo no /tmp do nó
-export JOB_UNIQUE_DIR="/tmp/cschuller_job_${MISS_PROB}_$$"
-mkdir -p "$JOB_UNIQUE_DIR"
+# 1. Cria um diretório único no /tmp do nó
+JOB_DIR="/tmp/cschuller_job_${MISS_PROB}_${RANDOM}_$$"
+mkdir -p "$JOB_DIR"
+cd "$JOB_DIR"
 
-# Redirecionamos o HOME e TMP para este diretório único.
-# O srlearn usará isso para criar as pastas 'bsrl_data' sem colidir com outros jobs.
-export HOME="$JOB_UNIQUE_DIR"
-export TMPDIR="$JOB_UNIQUE_DIR"
+# 2. ISOLAMENTO DO AMBIENTE (Cria uma cópia leve do VENV)
+# O parâmetro --system-site-packages com o virtualenv permite criar um venv 
+# que aponta para o original, mas permite escrita local no site-packages.
+python3 -m venv --system-site-packages ./temp_venv
+source ./temp_venv/bin/activate
 
-source /home/users/cschuller/ambiente_land/bin/activate
+# Forçamos o PYTHONPATH para garantir que o job olhe para o diretório local primeiro
+export PYTHONPATH="$JOB_DIR/temp_venv/lib/python3.8/site-packages:$PYTHONPATH"
 
-# 3. Execução
-DATASET_TMP="$JOB_UNIQUE_DIR/dataset"
-mkdir -p "$DATASET_TMP"
+# 3. Preparação dos Dados
+mkdir -p ./dataset
+echo "Gerando dados em: $JOB_DIR/dataset"
+python3 "$BASE_DIR/generate_folds.py" --folds 5 --instances 50 --output "./dataset" --missing_prob "$MISS_PROB"
 
-echo "Gerando dados em: $DATASET_TMP"
-python3 generate_folds.py --folds 5 --instances 50 --output "$DATASET_TMP" --missing_prob "$MISS_PROB"
-
-echo "Iniciando RDN-Boost..."
-python3 -u run_rdn_cv_simplified.py \
-    --data_path "$DATASET_TMP" \
+# 4. Execução do Treino
+echo "Iniciando RDN-Boost no VENV isolado..."
+python3 -u "$BASE_DIR/run_rdn_cv_simplified.py" \
+    --data_path "./dataset" \
     --max_depth "$D" \
     --node_size "$S" \
     --n_estimators "$E" \
     "$@"
 
-# 4. LIMPEZA TOTAL
-rm -rf "$JOB_UNIQUE_DIR"
+# 5. Limpeza
+rm -rf "$JOB_DIR"
 
 echo "==== FIM ===="
 date
