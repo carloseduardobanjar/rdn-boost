@@ -12,7 +12,7 @@ log    = logs/job_p$(p_miss)_d$(depth)_s$(size)_e$(est).log
 # 1. p_miss (usado no generate_folds.py)
 # 2. depth, size, est (usados no run_rdn_cv_simplified.py)
 # 3. output_path (organizado por experimento)
-arguments = $(p_miss) $(depth) $(size) $(est) --output_path /home/users/cschuller/rdn-boost/experimentos_land3/resultados_v2/grid_p$(p_miss)_d$(depth)
+arguments = $(p_miss) $(depth) $(size) $(est) --output_path /home/users/cschuller/rdn-boost/experimentos_land3/resultados_v3/grid_p$(p_miss)_d$(depth)
 
 # Recursos solicitados
 request_cpus = 1
