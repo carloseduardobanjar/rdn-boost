@@ -11,3 +11,6 @@ experimentos/dataset
 experimentos_land/.venv
 experimentos_land2/.venv
 experimentos_land3/.venv
+
+res_d3_s2_e5 (land, 0.2 attackerLocated)
+res_d3_s2_e5 (land, attackerLocatedm vulExists, vulProperty)
