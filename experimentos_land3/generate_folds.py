@@ -64,13 +64,11 @@ def generate_balanced_dataset(
 
         # ================= POSITIVE =================
         if is_positive:
-            # Fatos estruturais (Sempre presentes para manter a conectividade do grafo)
             facts.append(f"hacl({zone}, {ws}, {protocol}, {port}).")
             facts.append(
                 f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv})."
             )
 
-            # Fatos críticos (Sujeitos à omissão uniforme para o Stress Test)
             if random.random() >= missing_prob:
                 facts.append(f"attackerLocated({zone}).")
 
@@ -86,115 +84,114 @@ def generate_balanced_dataset(
         else:
             failure_type = random.randint(1, 10)
 
+            # --- Gerar os fatos de acordo com o tipo de falha ---
+            # Mas aplicar a missing_prob em fatos críticos presentes nos negativos
+
             if failure_type == 1:
-                facts.append(f"attackerLocated({unknown_zone}).")
+                if random.random() >= missing_prob:
+                    facts.append(f"attackerLocated({unknown_zone}).")
                 facts.append(f"hacl({zone}, {ws}, {protocol}, {port}).")
 
             elif failure_type == 2:
-                facts.append(f"attackerLocated({zone}).")
+                if random.random() >= missing_prob:
+                    facts.append(f"attackerLocated({zone}).")
 
             elif failure_type == 3:
                 wrong_port = port + 999
-                facts.append(f"attackerLocated({zone}).")
+                if random.random() >= missing_prob:
+                    facts.append(f"attackerLocated({zone}).")
                 facts.append(f"hacl({zone}, {ws}, {protocol}, {wrong_port}).")
 
             elif failure_type == 4:
                 wrong_protocol = "udp"
-                facts.append(f"attackerLocated({zone}).")
+                if random.random() >= missing_prob:
+                    facts.append(f"attackerLocated({zone}).")
                 facts.append(f"hacl({zone}, {ws}, {wrong_protocol}, {port}).")
 
             elif failure_type == 5:
                 other_service = random.choice([s for s in services if s != service])
                 wrong_cve = random.choice(services[other_service]["cves"])
-
-                facts.append(f"attackerLocated({zone}).")
+                if random.random() >= missing_prob:
+                    facts.append(f"attackerLocated({zone}).")
                 facts.append(f"hacl({zone}, {ws}, {protocol}, {port}).")
-                facts.append(
-                    f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv})."
-                )
-                facts.append(f"vulExists({ws}, '{wrong_cve}', {other_service}).")
-
+                facts.append(f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv}).")
+                if random.random() >= missing_prob:
+                    facts.append(f"vulExists({ws}, '{wrong_cve}', {other_service}).")
                 neg.append(f"execCode({ws}, {service_priv}).")
                 continue
 
             elif failure_type == 6:
-                facts.append(f"attackerLocated({zone}).")
+                if random.random() >= missing_prob:
+                    facts.append(f"attackerLocated({zone}).")
                 facts.append(f"hacl({zone}, {ws}, {protocol}, {port}).")
-                facts.append(
-                    f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv})."
-                )
-                facts.append(f"vulExists({ws}, 'CVE-LOCAL-{i}', {service}).")
-                facts.append(f"vulProperty('CVE-LOCAL-{i}', localExploit, privEscalation).")
-
+                facts.append(f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv}).")
+                if random.random() >= missing_prob:
+                    facts.append(f"vulExists({ws}, 'CVE-LOCAL-{i}', {service}).")
+                if random.random() >= missing_prob:
+                    facts.append(f"vulProperty('CVE-LOCAL-{i}', localExploit, privEscalation).")
                 neg.append(f"execCode({ws}, {service_priv}).")
                 continue
 
             elif failure_type == 7:
                 wrong_port = port + 111
-
-                facts.append(f"attackerLocated({zone}).")
+                if random.random() >= missing_prob:
+                    facts.append(f"attackerLocated({zone}).")
                 facts.append(f"hacl({zone}, {ws}, {protocol}, {port}).")
-                facts.append(
-                    f"networkServiceInfo({ws}, {service}, {protocol}, {wrong_port}, {service_priv})."
-                )
-                facts.append(f"vulExists({ws}, '{cve}', {service}).")
-                facts.append(f"vulProperty('{cve}', remoteExploit, privEscalation).")
-
+                facts.append(f"networkServiceInfo({ws}, {service}, {protocol}, {wrong_port}, {service_priv}).")
+                if random.random() >= missing_prob:
+                    facts.append(f"vulExists({ws}, '{cve}', {service}).")
+                if random.random() >= missing_prob:
+                    facts.append(f"vulProperty('{cve}', remoteExploit, privEscalation).")
                 neg.append(f"execCode({ws}, {service_priv}).")
                 continue
 
             elif failure_type == 8:
-                facts.append(f"attackerLocated({zone}).")
+                if random.random() >= missing_prob:
+                    facts.append(f"attackerLocated({zone}).")
                 facts.append(f"hacl({zone}, {ws}, {protocol}, {port}).")
-                facts.append(
-                    f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv})."
-                )
-                facts.append(f"vulExists({ws}, '{cve}', {service}).")
-                facts.append(f"vulProperty('{cve}', remoteExploit, denialOfService).")
-
+                facts.append(f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv}).")
+                if random.random() >= missing_prob:
+                    facts.append(f"vulExists({ws}, '{cve}', {service}).")
+                if random.random() >= missing_prob:
+                    facts.append(f"vulProperty('{cve}', remoteExploit, denialOfService).")
                 neg.append(f"execCode({ws}, {service_priv}).")
                 continue
 
             elif failure_type == 9:
-                facts.append(f"attackerLocated({zone}).")
+                if random.random() >= missing_prob:
+                    facts.append(f"attackerLocated({zone}).")
                 facts.append(f"hacl({zone}, {ws}, {protocol}, {port}).")
-
                 other_service = random.choice([s for s in services if s != service])
                 other_port = random.choice(services[other_service]["ports"])
                 other_cve = random.choice(services[other_service]["cves"])
-
-                facts.append(
-                    f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv})."
-                )
-                facts.append(
-                    f"networkServiceInfo({ws}, {other_service}, {protocol}, {other_port}, {services[other_service]['default_priv']})."
-                )
-                facts.append(f"vulExists({ws}, '{other_cve}', {other_service}).")
-                facts.append(f"vulProperty('{other_cve}', remoteExploit, privEscalation).")
-
+                facts.append(f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv}).")
+                facts.append(f"networkServiceInfo({ws}, {other_service}, {protocol}, {other_port}, {services[other_service]['default_priv']}).")
+                if random.random() >= missing_prob:
+                    facts.append(f"vulExists({ws}, '{other_cve}', {other_service}).")
+                if random.random() >= missing_prob:
+                    facts.append(f"vulProperty('{other_cve}', remoteExploit, privEscalation).")
                 neg.append(f"execCode({ws}, {service_priv}).")
                 continue
 
             else:
-                facts.append(f"attackerLocated({zone}).")
+                if random.random() >= missing_prob:
+                    facts.append(f"attackerLocated({zone}).")
                 facts.append(f"hacl({zone}, {ws}, {protocol}, {port}).")
-                facts.append(
-                    f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv})."
-                )
-                facts.append(f"vulExists({ws}, '{cve}', {service}).")
-                facts.append(f"vulProperty('{cve}', remoteExploit, privEscalation).")
-
+                facts.append(f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv}).")
+                if random.random() >= missing_prob:
+                    facts.append(f"vulExists({ws}, '{cve}', {service}).")
+                if random.random() >= missing_prob:
+                    facts.append(f"vulProperty('{cve}', remoteExploit, privEscalation).")
                 wrong_priv = "root" if service_priv != "root" else "user"
                 neg.append(f"execCode({ws}, {wrong_priv}).")
                 continue
 
-            # Fallback for remaining failures
-            facts.append(
-                f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv})."
-            )
-            facts.append(f"vulExists({ws}, '{cve}', {service}).")
-            facts.append(f"vulProperty('{cve}', remoteExploit, privEscalation).")
-
+            # Fallback para completar a estrutura básica do negativo se necessário
+            facts.append(f"networkServiceInfo({ws}, {service}, {protocol}, {port}, {service_priv}).")
+            if random.random() >= missing_prob:
+                facts.append(f"vulExists({ws}, '{cve}', {service}).")
+            if random.random() >= missing_prob:
+                facts.append(f"vulProperty('{cve}', remoteExploit, privEscalation).")
             neg.append(f"execCode({ws}, {service_priv}).")
 
     return facts, pos, neg
@@ -203,50 +200,34 @@ def generate_balanced_dataset(
 def save_fold(output_dir, fold_number, facts, pos, neg):
     fold_path = os.path.join(output_dir, f"fold{fold_number:02d}")
     os.makedirs(fold_path, exist_ok=True)
-
     with open(os.path.join(fold_path, "facts.pl"), "w") as f:
         f.write("\n".join(facts))
-
     with open(os.path.join(fold_path, "pos.pl"), "w") as f:
         f.write("\n".join(pos))
-
     with open(os.path.join(fold_path, "neg.pl"), "w") as f:
         f.write("\n".join(neg))
 
 
 def main():
     parser = argparse.ArgumentParser(description="Generate Network relational dataset for Resilience Stress Test")
-
     parser.add_argument("--folds", type=int, required=True)
     parser.add_argument("--instances", type=int, required=True)
     parser.add_argument("--output", type=str, required=True)
-
-    parser.add_argument(
-        "--missing_prob",
-        type=float,
-        default=0.0,
-        help="Probabilidade única de omitir fatos críticos (attackerLocated, vulExists, vulProperty)"
-    )
+    parser.add_argument("--missing_prob", type=float, default=0.0,
+                        help="Probabilidade única de omitir fatos críticos")
 
     args = parser.parse_args()
-
     os.makedirs(args.output, exist_ok=True)
-
     current_index = 1
-
     for fold in range(1, args.folds + 1):
         facts, pos, neg = generate_balanced_dataset(
             num_instances=args.instances,
             start_index=current_index,
             missing_prob=args.missing_prob
         )
-
         save_fold(args.output, fold, facts, pos, neg)
-
         current_index += args.instances
-
         print(f"Fold {fold} gerado com missing_prob={args.missing_prob}")
-
     print("\nTodos os folds foram gerados com sucesso!")
 
 
