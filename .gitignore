@@ -34,5 +34,4 @@ cluster/results_summary.csv
 !cluster/out/.gitkeep
 !cluster/results/.gitkeep
 
-/cluster
 /manual_cases

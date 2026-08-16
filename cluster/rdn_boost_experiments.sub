@@ -1,0 +1,32 @@
+universe = vanilla
+executable = cluster/run_condor_job.sh
+initialdir = .
+
+arguments = $(job_id)
+
+log = cluster/log/$(job_id).log
+output = cluster/out/$(job_id).out
+error = cluster/error/$(job_id).err
+
+request_cpus = 1
+request_memory = $(request_memory)
+request_disk = 4GB
+
+# O manual do LAND recomenda explicitar recursos para evitar sobrecarga de RAM.
+# Rank prioriza slots com mais memoria quando houver escolha.
+rank = Memory
+
+# Este projeto assume que o repositorio e o virtualenv ja existem no filesystem
+# compartilhado do cluster. Assim evitamos transferir .venv/modelos pelo Condor.
+should_transfer_files = NO
+
+queue job_id, request_memory from (
+  smoke_s7, 2GB
+  smoke_s17, 2GB
+  small_s7, 4GB
+  small_s17, 4GB
+  small_s29, 4GB
+  medium_s7, 6GB
+  medium_s17, 6GB
+  medium_s29, 6GB
+)

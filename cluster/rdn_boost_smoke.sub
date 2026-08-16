@@ -1,0 +1,20 @@
+universe = vanilla
+executable = cluster/run_condor_job.sh
+initialdir = .
+
+arguments = $(job_id)
+
+log = cluster/log/$(job_id).log
+output = cluster/out/$(job_id).out
+error = cluster/error/$(job_id).err
+
+request_cpus = 1
+request_memory = $(request_memory)
+request_disk = 4GB
+rank = Memory
+should_transfer_files = NO
+
+queue job_id, request_memory from (
+  smoke_s7, 2GB
+  smoke_s17, 2GB
+)
