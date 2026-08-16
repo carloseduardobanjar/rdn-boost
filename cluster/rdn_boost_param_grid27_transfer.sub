@@ -1,0 +1,49 @@
+universe = vanilla
+executable = cluster/run_condor_archive_job.sh
+initialdir = .
+
+arguments = $(job_id)
+
+log = cluster/log/$(job_id).log
+output = cluster/out/$(job_id).out
+error = cluster/error/$(job_id).err
+
+request_cpus = 1
+request_memory = $(request_memory)
+request_disk = 2GB
+rank = Memory
+
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+transfer_input_files = cluster/condor_payload.tar.gz
+transfer_output_files = results
+
+queue job_id, request_memory from (
+  grid_d3_e10_n1_s7, 1800MB
+  grid_d3_e10_n2_s7, 1500MB
+  grid_d3_e10_n3_s7, 1500MB
+  grid_d3_e20_n1_s7, 1800MB
+  grid_d3_e20_n2_s7, 1500MB
+  grid_d3_e20_n3_s7, 1500MB
+  grid_d3_e30_n1_s7, 1800MB
+  grid_d3_e30_n2_s7, 1800MB
+  grid_d3_e30_n3_s7, 1800MB
+  grid_d4_e10_n1_s7, 1800MB
+  grid_d4_e10_n2_s7, 1500MB
+  grid_d4_e10_n3_s7, 1500MB
+  grid_d4_e20_n1_s7, 1800MB
+  grid_d4_e20_n2_s7, 1500MB
+  grid_d4_e20_n3_s7, 1500MB
+  grid_d4_e30_n1_s7, 1800MB
+  grid_d4_e30_n2_s7, 1800MB
+  grid_d4_e30_n3_s7, 1800MB
+  grid_d5_e10_n1_s7, 1800MB
+  grid_d5_e10_n2_s7, 1800MB
+  grid_d5_e10_n3_s7, 1800MB
+  grid_d5_e20_n1_s7, 1800MB
+  grid_d5_e20_n2_s7, 1800MB
+  grid_d5_e20_n3_s7, 1800MB
+  grid_d5_e30_n1_s7, 1800MB
+  grid_d5_e30_n2_s7, 1800MB
+  grid_d5_e30_n3_s7, 1800MB
+)

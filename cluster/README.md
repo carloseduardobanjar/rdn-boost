@@ -104,6 +104,44 @@ python cluster/make_submit.py --stage medium --output cluster/rdn_boost_medium.s
 condor_submit cluster/rdn_boost_medium.sub
 ```
 
+## 5.1. Submeter grade de parametros
+
+Para explorar parametros com uma seed, gere a grade:
+
+```bash
+python cluster/add_param_grid.py
+```
+
+Isso adiciona a stage `param_grid27` com:
+
+```text
+max_depth = 3, 4, 5
+n_estimators = 10, 20, 30
+node_size = 1, 2, 3
+seed = 7
+```
+
+Como o LAND pode nao compartilhar o mesmo filesystem entre Zeus e os nós, use o modo com transferencia por arquivo compactado:
+
+```bash
+./cluster/make_condor_payload.sh
+
+python cluster/make_submit.py \
+  --stage param_grid27 \
+  --transfer \
+  --output cluster/rdn_boost_param_grid27_transfer.sub
+
+condor_submit cluster/rdn_boost_param_grid27_transfer.sub
+```
+
+Quando terminar:
+
+```bash
+python cluster/aggregate_results.py \
+  --results_root results \
+  --output results_summary_param_grid27.csv
+```
+
 ## 6. Configurações atuais
 
 As configurações ficam em:

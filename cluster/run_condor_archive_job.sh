@@ -12,9 +12,10 @@ export OPENBLAS_NUM_THREADS=1
 export MKL_NUM_THREADS=1
 export NUMEXPR_NUM_THREADS=1
 
-if [[ -f ".venv/bin/activate" ]]; then
-  # shellcheck disable=SC1091
-  source ".venv/bin/activate"
+if [[ -x ".venv/bin/python" ]]; then
+  PYTHON="./.venv/bin/python"
+else
+  PYTHON="$(command -v python)"
 fi
 
 echo "==== INICIO ===="
@@ -22,9 +23,9 @@ date
 echo "Host: $(hostname)"
 echo "Workdir: $(pwd)"
 echo "Job: $JOB_ID"
-echo "Python: $(command -v python)"
+echo "Python: $PYTHON"
 
-python -u cluster/run_one_experiment.py \
+"$PYTHON" -u cluster/run_one_experiment.py \
   --manifest cluster/experiments.csv \
   --job_id "$JOB_ID" \
   --results_root results \
