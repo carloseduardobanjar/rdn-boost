@@ -3,7 +3,12 @@ set -euo pipefail
 
 JOB_ID="${1:?uso: run_condor_job.sh <job_id>}"
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "$SCRIPT_DIR/../train_mulval_exec_code.py" ]]; then
+  REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+else
+  REPO_ROOT="$(pwd)"
+fi
 cd "$REPO_ROOT"
 
 export OMP_NUM_THREADS=1
@@ -23,10 +28,20 @@ echo "Repo: $REPO_ROOT"
 echo "Job: $JOB_ID"
 echo "Python: $(command -v python)"
 
-python -u cluster/run_one_experiment.py \
-  --manifest cluster/experiments.csv \
+if [[ -f "cluster/run_one_experiment.py" ]]; then
+  RUNNER="cluster/run_one_experiment.py"
+  MANIFEST="cluster/experiments.csv"
+  RESULTS_ROOT="cluster/results"
+else
+  RUNNER="run_one_experiment.py"
+  MANIFEST="experiments.csv"
+  RESULTS_ROOT="results"
+fi
+
+python -u "$RUNNER" \
+  --manifest "$MANIFEST" \
   --job_id "$JOB_ID" \
-  --results_root cluster/results \
+  --results_root "$RESULTS_ROOT" \
   --clean
 
 echo "==== FIM ===="

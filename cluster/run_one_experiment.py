@@ -18,6 +18,14 @@ def read_experiment(manifest_path, job_id):
     raise ValueError(f"job_id nao encontrado em {manifest_path}: {job_id}")
 
 
+def find_repo_root():
+    candidates = [Path.cwd(), Path(__file__).resolve().parent, *Path(__file__).resolve().parents]
+    for candidate in candidates:
+        if (candidate / "train_mulval_exec_code.py").exists():
+            return candidate
+    raise FileNotFoundError("Nao encontrei train_mulval_exec_code.py para definir a raiz do projeto.")
+
+
 def as_int(row, key):
     return int(row[key])
 
@@ -156,7 +164,7 @@ def parse_args():
 
 def main():
     args = parse_args()
-    repo_root = Path(__file__).resolve().parents[1]
+    repo_root = find_repo_root()
     manifest_path = (repo_root / args.manifest).resolve()
     results_root = (repo_root / args.results_root).resolve()
     row = read_experiment(manifest_path, args.job_id)

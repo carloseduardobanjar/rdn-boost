@@ -1,9 +1,9 @@
 job_id,stage,seed,folds,instances_per_fold,density,background,positives_per_fold,negatives_per_fold,max_depth,node_size,n_estimators,threshold,request_memory
 smoke_s7,smoke,7,3,500,1.3,primitive,20,20,3,2,5,0.38,2GB
 smoke_s17,smoke,17,3,500,1.3,primitive,20,20,3,2,5,0.38,2GB
-small_s7,small,7,5,5000,1.3,primitive,250,250,4,2,20,0.38,4GB
-small_s17,small,17,5,5000,1.3,primitive,250,250,4,2,20,0.38,4GB
-small_s29,small,29,5,5000,1.3,primitive,250,250,4,2,20,0.38,4GB
-medium_s7,medium,7,5,10000,1.4,primitive,500,500,4,2,30,0.38,6GB
-medium_s17,medium,17,5,10000,1.4,primitive,500,500,4,2,30,0.38,6GB
-medium_s29,medium,29,5,10000,1.4,primitive,500,500,4,2,30,0.38,6GB
+small_s7,small,7,5,5000,1.3,primitive,250,250,4,2,20,0.38,1500MB
+small_s17,small,17,5,5000,1.3,primitive,250,250,4,2,20,0.38,1500MB
+small_s29,small,29,5,5000,1.3,primitive,250,250,4,2,20,0.38,1500MB
+medium_s7,medium,7,5,10000,1.4,primitive,500,500,4,2,30,0.38,2500MB
+medium_s17,medium,17,5,10000,1.4,primitive,500,500,4,2,30,0.38,2500MB
+medium_s29,medium,29,5,10000,1.4,primitive,500,500,4,2,30,0.38,2500MB
