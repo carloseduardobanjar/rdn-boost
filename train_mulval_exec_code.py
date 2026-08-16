@@ -441,8 +441,15 @@ def build_examples(facts, hosts, negative_ratio, positives_per_fold=None, negati
 
 
 def summarize_rule_coverage(positive_examples, exec_code_rules):
+    def parse_exec_code_example(example):
+        prefix = "execCode("
+        suffix = ")."
+        if not example.startswith(prefix) or not example.endswith(suffix):
+            raise ValueError(f"Exemplo execCode invalido: {example}")
+        return tuple(example[len(prefix) : -len(suffix)].split(", "))
+
     positive_tuples = {
-        tuple(example.removeprefix("execCode(").removesuffix(").").split(", "))
+        parse_exec_code_example(example)
         for example in positive_examples
     }
     coverage = defaultdict(int)
