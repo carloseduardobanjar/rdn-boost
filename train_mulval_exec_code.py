@@ -254,7 +254,12 @@ def close_mulval_rules(primitive_facts, max_iterations=80):
     for _iteration in range(max_iterations):
         changed = False
 
-        for host, cve, software in list(facts["vulExists"]):
+        for vul_exists in list(facts["vulExists"]):
+            if len(vul_exists) == 5:
+                changed |= derive("vulExists5", *vul_exists)
+                continue
+
+            host, cve, software = vul_exists
             for prop_cve, vuln_range, consequence in list(facts["vulProperty"]):
                 if cve == prop_cve:
                     changed |= derive("vulExists5", host, cve, software, vuln_range, consequence)
@@ -271,7 +276,8 @@ def close_mulval_rules(primitive_facts, max_iterations=80):
             if software in {"sshd", "vpnService"}:
                 changed |= derive("logInService", host, protocol, port)
 
-        for located in list(facts["attackerLocated"]):
+        for located_item in list(facts["attackerLocated"]):
+            located = located_item[0]
             for src, dst, protocol, port in list(facts["hacl"]):
                 if located == src:
                     changed |= derive("netAccess", dst, protocol, port)
@@ -377,27 +383,43 @@ def close_mulval_rules(primitive_facts, max_iterations=80):
 
 def build_malicious_input(facts):
     results = set()
-    principals = {item[0] for item in facts["inCompetent"]} | {item[0] for item in facts["competent"]}
+    incompetent = {item[0] for item in facts["inCompetent"]}
+    competent = {item[0] for item in facts["competent"]}
+    principals = incompetent | competent
 
-    for victim, host, _privilege in facts["hasAccount"]:
-        if victim not in principals:
-            continue
-        for installed_host, software in facts["clientProgram"]:
-            if host != installed_host:
-                continue
+    remote_client_software = defaultdict(set)
+    for host, _cve, software, vuln_range, consequence in facts["vulExists5"]:
+        if vuln_range == "remoteClient" and consequence == "privEscalation":
+            remote_client_software[host].add(software)
+
+    for host, software in facts["clientProgram"]:
+        remote_client_software[host].add(software)
+
+    for victim in principals:
+        for host, software_set in remote_client_software.items():
             for hacl_src, malicious_machine, protocol, port in facts["hacl"]:
-                if hacl_src == host and protocol == "httpProtocol" and port == "httpPort":
-                    if (malicious_machine,) in facts["attackerLocated"]:
+                if hacl_src != host or protocol != "httpProtocol" or port != "httpPort":
+                    continue
+
+                if (malicious_machine,) in facts["attackerLocated"]:
+                    for software in software_set:
                         results.add((host, victim, software))
-                    if (malicious_machine,) in facts["isWebServer"]:
-                        if any(exec_host == malicious_machine for exec_host, _ in facts["execCode"]):
+
+                if victim in incompetent and (malicious_machine,) in facts["isWebServer"]:
+                    if any(exec_host == malicious_machine for exec_host, _ in facts["execCode"]):
+                        for software in software_set:
                             results.add((host, victim, software))
 
     return results
 
 
-def build_examples(facts, hosts, negative_ratio):
-    positives = sorted(facts["execCode"])
+def build_examples(facts, hosts, negative_ratio, positives_per_fold=None, negatives_per_fold=None):
+    positive_candidates = sorted(facts["execCode"])
+    positives = list(positive_candidates)
+    if positives_per_fold is not None:
+        random.shuffle(positives)
+        positives = sorted(positives[:positives_per_fold])
+
     observed_privileges = set(PRIVILEGES)
 
     for _host, _software, _protocol, _port, privilege in facts["networkServiceInfo"]:
@@ -406,10 +428,13 @@ def build_examples(facts, hosts, negative_ratio):
         observed_privileges.add(privilege)
 
     candidates = {(host, privilege) for host in hosts for privilege in observed_privileges}
-    negatives = sorted(candidates - set(positives))
+    negatives = sorted(candidates - set(positive_candidates))
     random.shuffle(negatives)
 
-    wanted_negatives = max(len(positives) * negative_ratio, 1)
+    if negatives_per_fold is not None:
+        wanted_negatives = negatives_per_fold
+    else:
+        wanted_negatives = max(len(positives) * negative_ratio, 1)
     negatives = sorted(negatives[:wanted_negatives])
 
     return [fact("execCode", *item) for item in positives], [fact("execCode", *item) for item in negatives]
@@ -461,13 +486,42 @@ def write_rule_coverage_csv(path, rows):
             )
 
 
-def generate_dataset(num_instances, start_index, density, negative_ratio, min_positives, background):
+def generate_dataset(
+    num_instances,
+    start_index,
+    density,
+    negative_ratio,
+    min_positives,
+    background,
+    positives_per_fold=None,
+    negatives_per_fold=None,
+):
+    required_positives = positives_per_fold if positives_per_fold is not None else min_positives
+    required_negatives = negatives_per_fold
+
     for attempt in range(1, 31):
+        print(
+            f"Tentativa {attempt}: gerando {num_instances} hosts e aplicando fechamento logico...",
+            flush=True,
+        )
         primitive_facts, hosts = generate_random_primitives(num_instances, start_index, density)
         closed_facts, exec_code_rules = close_mulval_rules(primitive_facts)
-        positives, negatives = build_examples(closed_facts, hosts, negative_ratio)
+        positives, negatives = build_examples(
+            closed_facts,
+            hosts,
+            negative_ratio,
+            positives_per_fold,
+            negatives_per_fold,
+        )
 
-        if len(positives) >= min_positives and negatives:
+        has_enough_positives = len(positives) >= required_positives
+        has_enough_negatives = (
+            len(negatives) == required_negatives
+            if required_negatives is not None
+            else bool(negatives)
+        )
+
+        if has_enough_positives and has_enough_negatives:
             background_facts = defaultdict(set)
             for name, values in primitive_facts.items():
                 background_facts[name].update(values)
@@ -483,11 +537,11 @@ def generate_dataset(num_instances, start_index, density, negative_ratio, min_po
             return serialize_facts(background_facts), positives, negatives, coverage
 
         print(
-            f"Tentativa {attempt}: apenas {len(positives)} positivos; "
+            f"Tentativa {attempt}: {len(positives)} positivos e {len(negatives)} negativos; "
             "gerando novos fatos."
         )
 
-    raise RuntimeError("Nao foi possivel gerar positivos suficientes com os parametros atuais.")
+    raise RuntimeError("Nao foi possivel gerar exemplos suficientes com os parametros atuais.")
 
 
 def write_lines(path, lines):
@@ -503,6 +557,8 @@ def generate_folds(
     negative_ratio,
     min_positives,
     background,
+    positives_per_fold=None,
+    negatives_per_fold=None,
 ):
     random.seed(seed)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -513,6 +569,12 @@ def generate_folds(
         fold_dir = output_dir / f"fold{fold:02d}"
         fold_dir.mkdir(parents=True, exist_ok=True)
 
+        print(
+            f"\nGerando fold{fold:02d}: hosts={instances_per_fold}, density={density}, "
+            f"background={background}",
+            flush=True,
+        )
+
         facts, positives, negatives, coverage = generate_dataset(
             instances_per_fold,
             current_index,
@@ -520,6 +582,8 @@ def generate_folds(
             negative_ratio,
             min_positives,
             background,
+            positives_per_fold,
+            negatives_per_fold,
         )
         facts_header = (
             "% --- Primitive MulVAL facts ---"
@@ -761,6 +825,8 @@ def train_cross_validation(args):
             args.negative_ratio,
             args.min_positives,
             args.background,
+            args.positives_per_fold,
+            args.negatives_per_fold,
         )
 
     fold_names = [f"fold{i:02d}" for i in range(1, args.folds + 1)]
@@ -870,6 +936,18 @@ def parse_args():
     parser.add_argument("--negative_ratio", type=int, default=2)
     parser.add_argument("--min_positives", type=int, default=5)
     parser.add_argument(
+        "--positives_per_fold",
+        type=int,
+        default=None,
+        help="Quantidade exata de exemplos positivos execCode a salvar por fold. Se omitido, usa todos os positivos inferidos.",
+    )
+    parser.add_argument(
+        "--negatives_per_fold",
+        type=int,
+        default=None,
+        help="Quantidade exata de exemplos negativos execCode a salvar por fold. Se omitido, usa --negative_ratio.",
+    )
+    parser.add_argument(
         "--background",
         choices=["primitive", "closed"],
         default="primitive",
@@ -904,6 +982,8 @@ def main():
             args.negative_ratio,
             args.min_positives,
             args.background,
+            args.positives_per_fold,
+            args.negatives_per_fold,
         )
         return
     train_cross_validation(args)

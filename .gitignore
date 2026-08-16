@@ -23,3 +23,16 @@ resultados_v2
 backup/*
 
 __pycache__/
+
+cluster/error/*
+cluster/log/*
+cluster/out/*
+cluster/results/*
+cluster/results_summary.csv
+!cluster/error/.gitkeep
+!cluster/log/.gitkeep
+!cluster/out/.gitkeep
+!cluster/results/.gitkeep
+
+/cluster
+/manual_cases
