@@ -25,7 +25,7 @@ queue job_id, request_memory from (
 """
 
 TRANSFER_TEMPLATE = """universe = vanilla
-executable = cluster/run_condor_job.sh
+executable = cluster/run_condor_archive_job.sh
 initialdir = .
 
 arguments = $(job_id)
@@ -41,7 +41,7 @@ rank = Memory
 
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-transfer_input_files = .venv, train_mulval_exec_code.py, evaluate_threshold.py, cluster/run_one_experiment.py, cluster/experiments.csv
+transfer_input_files = cluster/condor_payload.tar.gz
 transfer_output_files = results
 
 queue job_id, request_memory from (
