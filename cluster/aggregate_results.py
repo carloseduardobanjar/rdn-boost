@@ -29,7 +29,7 @@ def load_json(path):
 def collect_result(result_dir):
     config = load_json(result_dir / "config.json")
     metadata = load_json(result_dir / "metadata.json")
-    threshold = float(config.get("threshold", 0.38))
+    threshold = float(config.get("threshold", 0.50))
     metrics_path = result_dir / "output" / f"metrics_threshold_{threshold:.2f}.csv"
     rows = read_csv_rows(metrics_path)
     aggregate = next((row for row in rows if row["fold"] == "Agregado"), {})
