@@ -26,10 +26,17 @@ def load_json(path):
     return json.loads(path.read_text())
 
 
-def collect_result(result_dir):
+def collect_result(result_dir, target_threshold=None):
     config = load_json(result_dir / "config.json")
     metadata = load_json(result_dir / "metadata.json")
-    threshold = float(config.get("threshold", 0.50))
+
+    # Se um threshold foi passado via argumento CLI, usa ele.
+    # Caso contrário, pega do config.json (fallback 0.38).
+    if target_threshold is not None:
+        threshold = target_threshold
+    else:
+        threshold = float(config.get("threshold", 0.38))
+
     metrics_path = result_dir / "output" / f"metrics_threshold_{threshold:.2f}.csv"
     rows = read_csv_rows(metrics_path)
     aggregate = next((row for row in rows if row["fold"] == "Agregado"), {})
@@ -47,7 +54,7 @@ def collect_result(result_dir):
         "max_depth": config.get("max_depth", ""),
         "node_size": config.get("node_size", ""),
         "n_estimators": config.get("n_estimators", ""),
-        "threshold": config.get("threshold", ""),
+        "threshold": f"{threshold:.2f}",
         "total": aggregate.get("total", ""),
         "positives": aggregate.get("positives", ""),
         "negatives": aggregate.get("negatives", ""),
@@ -66,9 +73,17 @@ def collect_result(result_dir):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Agrega resultados dos experimentos do cluster.")
+    parser = argparse.ArgumentParser(
+        description="Agrega resultados dos experimentos do cluster."
+    )
     parser.add_argument("--results_root", default="cluster/results")
     parser.add_argument("--output", default="cluster/results_summary.csv")
+    parser.add_argument(
+        "--threshold",
+        type=float,
+        default=None,
+        help="Threshold das métricas a ser coletado (ex: 0.50)",
+    )
     return parser.parse_args()
 
 
@@ -76,7 +91,7 @@ def main():
     args = parse_args()
     results_root = Path(args.results_root)
     rows = [
-        collect_result(path)
+        collect_result(path, target_threshold=args.threshold)
         for path in sorted(results_root.iterdir())
         if path.is_dir() and (path / "config.json").exists()
     ]
