@@ -7,15 +7,13 @@ from sklearn.metrics import roc_auc_score
 
 def evaluate_predictions(csv_path, threshold):
     y_true, y_prob = [], []
+
     with open(csv_path, newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            # Identifica as colunas de rótulo real e probabilidade predita
-            target_col = "y_true" if "y_true" in row else "target"
-            prob_col = "y_prob" if "y_prob" in row else "probability"
-
-            y_true.append(float(row[target_col]))
-            y_prob.append(float(row[prob_col]))
+            # Colunas exatas do seu arquivo: 'actual' e 'probability'
+            y_true.append(float(row["actual"]))
+            y_prob.append(float(row["probability"]))
 
     y_true = np.array(y_true)
     y_prob = np.array(y_prob)
