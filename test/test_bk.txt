@@ -1,0 +1,51 @@
+setParam: numOfClauses=100.
+setParam: numOfCycles=100.
+usePrologVariables: true.
+setParam: nodeSize=2.
+setParam: maxTreeDepth=4.
+mode: execCode(+host, +privilege).
+mode: principalCompromised(+principal).
+mode: hasAccount(+principal, +host, -privilege).
+mode: canAccessHost(+host).
+mode: vulExists(+host, -vulID, -program).
+mode: vulExists(+host, -vulID, -program, #range, #consequence).
+mode: vulProperty(+vulID, #range, #consequence).
+mode: networkServiceInfo(+host, -program, -protocol, -port, -privilege).
+mode: netAccess(+host, -protocol, -port).
+mode: hacl(+host, -host, -protocol, -port).
+mode: hacl(+zone, -host, -protocol, -port).
+mode: attackerLocated(-zone).
+mode: attackerLocated(-host).
+mode: accessMaliciousInput(+host, +principal, -program).
+mode: accessFile(+host, #access, -path).
+mode: canAccessFile(+host, +privilege, #access, -path).
+mode: localFileProtection(+host, +privilege, #access, -path).
+mode: logInService(+host, -protocol, -port).
+mode: nfsExportInfo(+host, -path, #access, -host).
+mode: nfsMounted(+host, -path, +host, -path, #access).
+mode: installed(+host, -program).
+mode: dependsOn(+host, -program, -program).
+mode: clientProgram(+host, -program).
+mode: bugHyp(+host, -program, #range, #consequence).
+mode: inCompetent(+principal).
+mode: competent(+principal).
+mode: isWebServer(+host).
+mode: advances(+host, -host).
+okIfUnknown: netAccess/3.
+okIfUnknown: vulExists/5.
+okIfUnknown: accessFile/3.
+okIfUnknown: canAccessFile/4.
+okIfUnknown: canAccessHost/1.
+okIfUnknown: principalCompromised/1.
+okIfUnknown: accessMaliciousInput/3.
+okIfUnknown: logInService/3.
+okIfUnknown: localFileProtection/4.
+okIfUnknown: nfsMounted/5.
+okIfUnknown: nfsExportInfo/4.
+okIfUnknown: dependsOn/3.
+okIfUnknown: bugHyp/4.
+okIfUnknown: inCompetent/1.
+okIfUnknown: competent/1.
+okIfUnknown: isWebServer/1.
+okIfUnknown: advances/2.
+okIfUnknown: clientProgram/2.

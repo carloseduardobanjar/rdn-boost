@@ -1,0 +1,174 @@
+% Running on host: MacBook-Air-de-Carlos
+
+% Switching to VarIndicator = uppercase.
+
+% Unset'ing VarIndicator.
+
+% Calling ILPouterLoop from createRegressionOuterLooper.
+
+% getInputArgWithDefaultValue: args=[/Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/test_pos.txt, /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/test_neg.txt, /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/test_bk.txt, /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/test_facts.txt]
+%  for N=0: args[N]=/Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/test_pos.txt
+
+% getInputArgWithDefaultValue: args=[/Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/test_pos.txt, /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/test_neg.txt, /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/test_bk.txt, /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/test_facts.txt]
+%  for N=1: args[N]=/Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/test_neg.txt
+
+% getInputArgWithDefaultValue: args=[/Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/test_pos.txt, /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/test_neg.txt, /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/test_bk.txt, /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/test_facts.txt]
+%  for N=2: args[N]=/Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/test_bk.txt
+
+% getInputArgWithDefaultValue: args=[/Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/test_pos.txt, /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/test_neg.txt, /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/test_bk.txt, /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/test_facts.txt]
+%  for N=3: args[N]=/Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/test_facts.txt
+
+% Welcome to the WILL ILP/SRL systems.
+
+
+% Switching to VarIndicator = uppercase.
+
+% Unset'ing VarIndicator.
+% Reading background theory from dir: null
+
+% Switching to VarIndicator = uppercase.
+
+***** Warning: At least one argument in a mode should be an input argument.  You provided signature = [const], types = [-zone] for 'attackerLocated'. *****
+
+
+***** Warning: At least one argument in a mode should be an input argument.  You provided signature = [const], types = [-host] for 'attackerLocated'. *****
+
+
+***** Warning: % Since this is the first setting of the notation for variables, will keep:
+%   variableIndicator = uppercase *****
+
+% [ LazyGroundClauseIndex ]  Building full index for mode/1 with 1 assertions.
+% LoadAllModes() called.  Currently loaded modes: []
+% [ LazyGroundClauseIndex ]  Building full index for sameAs/2 with 2 assertions.
+% [ LazyGroundNthArgumentClauseIndex ]  Argument 1:  Building full index for exp/3.
+% [ LazyGroundNthArgumentClauseIndex ]  Argument 0:  Building full index for log/3.
+% LoadAllLibraries() called.  Currently loaded libraries: [listsInLogic, differentInLogic, modes_arithmeticInLogic, inlines_comparisonInLogic, modes_listsInLogic, inlines_differentInLogic, modes_differentInLogic, arithmeticInLogic, inlines_listsInLogic, modes_comparisonInLogic, comparisonInLogic, inlines_arithmeticInLogic]
+
+%  Read the facts.
+%  Have read 33 facts.
+% Have read 5 examples from '/Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test' [/Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/test*].
+% Have read 0 examples from '/Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test' [/Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/test*].
+
+%  LearnOneClause initialized.
+
+% The outer looper has been created.
+
+% Initializing the ILP inner looper.
+
+% NEW target:                 execCode(D, E)
+%  targetPred:                execCode/2
+%  targetArgTypes:            signature = [const, const], types = [+host, +privilege]
+%  targets:                   [execCode(D, E)]
+%  targetPredicates:          [execCode/2]
+%  targetArgSpecs:            [[D[+host], E[+privilege]]]
+%  variablesInTargets:        [[D, E]]
+
+% Started collecting constants
+
+% Collecting the types of constants.
+%  Because type='zone' is inconsistent with hacl/4[host, host, protocol, port], cannot infer constants from argument #1 in mode = [+zone, -host, -protocol, -port]
+%  Because type='host' is inconsistent with attackerLocated/1[zone], cannot infer constants from argument #1 in mode = [-host]
+
+% Looking at the training examples to see if any types of new constants can be inferred.
+
+% The type of the following constants are not known: 
+%  internet_1  [from: attackerLocated(internet_1)]
+%  Inferring that 'internet_1' is of type 'willAnything'.
+
+***** Warning: checkThatTypesOfAllConstantsAreKnown: Note that there were some constants whose type was not known (see list above or in dribble file). *****
+
+% Time to collect constants: 4 milliseconds
+% Time to collect examples: 0 seconds
+
+% Read 5 pos examples and 0 neg examples.
+% Time to init learnOneClause: 12 milliseconds
+% Old dir/Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/train/models/
+
+% Have 5 'raw' positive examples and kept 5.
+% Have 0 'raw' negative examples and kept 0.
+% No neg ex for execCode
+
+% processing backup's for execCode
+%  POS EX = 5
+%  NEG EX = 0
+
+% Memory usage by WILLSetup (just counts # targets?):
+%  |backupPosExamples| = 1
+%  |backupNegExamples| = 1
+%  |predicatesAsFacts| = 0
+%  |addedToFactBase|   = 0
+
+% Getting bRDN's target predicates.
+% Did not learn a model for 'execCode' this run.
+%   loadModel (#0): /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/train/models/bRDNs/Trees/execCodeTree0.tree
+%   loadModel (#1): /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/train/models/bRDNs/Trees/execCodeTree1.tree
+%   loadModel (#2): /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/train/models/bRDNs/Trees/execCodeTree2.tree
+%   loadModel (#3): /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/train/models/bRDNs/Trees/execCodeTree3.tree
+%   loadModel (#4): /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/train/models/bRDNs/Trees/execCodeTree4.tree
+%   loadModel (#5): /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/train/models/bRDNs/Trees/execCodeTree5.tree
+%   loadModel (#6): /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/train/models/bRDNs/Trees/execCodeTree6.tree
+%   loadModel (#7): /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/train/models/bRDNs/Trees/execCodeTree7.tree
+%   loadModel (#8): /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/train/models/bRDNs/Trees/execCodeTree8.tree
+%   loadModel (#9): /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/train/models/bRDNs/Trees/execCodeTree9.tree
+%   loadModel (#10): /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/train/models/bRDNs/Trees/execCodeTree10.tree
+%   loadModel (#11): /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/train/models/bRDNs/Trees/execCodeTree11.tree
+%   loadModel (#12): /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/train/models/bRDNs/Trees/execCodeTree12.tree
+%   loadModel (#13): /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/train/models/bRDNs/Trees/execCodeTree13.tree
+%   loadModel (#14): /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/train/models/bRDNs/Trees/execCodeTree14.tree
+%   loadModel (#15): /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/train/models/bRDNs/Trees/execCodeTree15.tree
+%   loadModel (#16): /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/train/models/bRDNs/Trees/execCodeTree16.tree
+%   loadModel (#17): /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/train/models/bRDNs/Trees/execCodeTree17.tree
+%   loadModel (#18): /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/train/models/bRDNs/Trees/execCodeTree18.tree
+%   loadModel (#19): /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/train/models/bRDNs/Trees/execCodeTree19.tree
+%  Done loading 20 models.
+File: /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/advice.txt doesnt exist.Hence no advice loaded
+
+% for execCode |lookupPos| = 5
+% for execCode |lookupNeg| = 0
+% getJointExamples: |pos| = 5, |neg| = 0
+
+% Starting inference in bRDN.
+% Trees = 20
+
+% Starting getMarginalProbabilities.
+% [ LazyGroundNthArgumentClauseIndex ]  Argument 0:  Building full index for vulExists/3.
+% [ LazyGroundClauseIndex ]  Building full index for vulProperty/3 with 5 assertions.
+% [ LazyGroundNthArgumentClauseIndex ]  Argument 0:  Building full index for networkServiceInfo/5.
+% [ LazyGroundClauseIndex ]  Building full index for attackerLocated/1 with 1 assertions.
+% [ LazyGroundNthArgumentClauseIndex ]  Argument 0:  Building full index for hacl/4.
+% [ LazyGroundNthArgumentClauseIndex ]  Argument 0:  Building full index for advances/2.
+% [ LazyGroundNthArgumentClauseIndex ]  Argument 1:  Building full index for hacl/4.
+% [ LazyGroundNthArgumentClauseIndex ]  Argument 1:  Building full index for networkServiceInfo/5.
+% [ LazyGroundClauseIndex ]  Building full index for networkServiceInfo/5 with 5 assertions.
+% [ LazyGroundClauseIndex ]  Building full index for installed/2 with 5 assertions.
+% [ LazyGroundClauseIndex ]  Building full index for advances/2 with 3 assertions.
+% [ LazyGroundClauseIndex ]  Building full index for vulExists/3 with 5 assertions.
+% No Gibbs sampling needed during inference.
+ (Arithmetic) Mean Probability Assigned to Correct Output Class: 0.401/5.00 = 0.080154
+
+ The weighted count of positive examples = 5.000 and the weighted count of negative examples = 0.000
+
+printExamples: Writing out predictions (for Tuffy?) on 5 examples for 'execCode' to:
+  /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/results_execCode.db
+ and to:
+  /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/query_execCode.db
+%    No need to compress since small: /Users/carlosesb/Documents/rdn-boost/.venv/lib/python3.9/site-packages/srlearn/bsrl_data/data0/test/query_execCode.db
+
+% Computing Area Under Curves.
+%Pos=5
+%Neg=0
+%LL:-12.753064398206629
+%LL:-12.753064398206629
+
+No negative examples in ComputeAUC.  Using AUC-ROC = 1.0 and AUC-PR = 1.0
+% F1 = 0.7499999999999999
+% Threshold = 0.06495146138754626
+
+%   AUC ROC   = 1.000000
+%   AUC PR    = 1.000000
+%   CLL	      = -2.550613
+%   Precision = NaN at threshold = 0.500
+%   Recall    = 0.000000
+%   F1        = NaN
+
+% Total inference time (20 trees): 690 milliseconds.

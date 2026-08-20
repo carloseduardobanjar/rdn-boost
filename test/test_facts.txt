@@ -1,0 +1,52 @@
+% --- Manual long multi-hop facts ---
+okIfUnknown: netAccess/3.
+okIfUnknown: vulExists/5.
+okIfUnknown: accessFile/3.
+okIfUnknown: canAccessFile/4.
+okIfUnknown: canAccessHost/1.
+okIfUnknown: principalCompromised/1.
+okIfUnknown: accessMaliciousInput/3.
+okIfUnknown: logInService/3.
+okIfUnknown: localFileProtection/4.
+okIfUnknown: nfsMounted/5.
+okIfUnknown: nfsExportInfo/4.
+okIfUnknown: dependsOn/3.
+okIfUnknown: bugHyp/4.
+okIfUnknown: inCompetent/1.
+okIfUnknown: competent/1.
+okIfUnknown: isWebServer/1.
+okIfUnknown: advances/2.
+okIfUnknown: clientProgram/2.
+advances(host1, host2).
+advances(host2, host3).
+advances(host3, host4).
+attackerLocated(internet_1).
+hacl(host1, host2, udp, 443).
+hacl(host2, host3, udp, 443).
+hacl(host3, host4, udp, 443).
+hacl(internet_1, host1, udp, 443).
+hasAccount(user_host1, host1, vpn_user).
+hasAccount(user_host2, host2, vpn_user).
+hasAccount(user_host3, host3, vpn_user).
+hasAccount(user_host4, host4, vpn_user).
+hasAccount(user_host_blocked, host_blocked, vpn_user).
+installed(host1, vpnService).
+installed(host2, vpnService).
+installed(host3, vpnService).
+installed(host4, vpnService).
+installed(host_blocked, vpnService).
+networkServiceInfo(host1, vpnService, udp, 443, vpn_user).
+networkServiceInfo(host2, vpnService, udp, 443, vpn_user).
+networkServiceInfo(host3, vpnService, udp, 443, vpn_user).
+networkServiceInfo(host4, vpnService, udp, 443, vpn_user).
+networkServiceInfo(host_blocked, vpnService, udp, 443, vpn_user).
+vulExists(host1, cve_host1_vpn, vpnService).
+vulExists(host2, cve_host2_vpn, vpnService).
+vulExists(host3, cve_host3_vpn, vpnService).
+vulExists(host4, cve_host4_vpn, vpnService).
+vulExists(host_blocked, cve_host_blocked_vpn, vpnService).
+vulProperty(cve_host1_vpn, remoteExploit, privEscalation).
+vulProperty(cve_host2_vpn, remoteExploit, privEscalation).
+vulProperty(cve_host3_vpn, remoteExploit, privEscalation).
+vulProperty(cve_host4_vpn, remoteExploit, privEscalation).
+vulProperty(cve_host_blocked_vpn, remoteExploit, privEscalation).
