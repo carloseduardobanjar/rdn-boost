@@ -6,14 +6,21 @@ import numpy as np
 from srlearn import Background, Database
 from srlearn.rdn import BoostedRDNClassifier
 
-# 1. Diretorio onde estao os arquivos do seu teste
+# 1. Caminhos dos arquivos da pasta de teste
 TEST_DIR = Path("~/rdn-boost/test").expanduser()
 FACTS_FILE = str(TEST_DIR / "test_facts.txt")
-POS_FILE = str(TEST_DIR / "test_pos.txt")
+POS_FILE = TEST_DIR / "test_pos.txt"
 NEG_FILE = str(TEST_DIR / "test_neg.txt") if (TEST_DIR / "test_neg.txt").exists() else None
 BK_FILE = TEST_DIR / "test_bk.txt"
 
-# 2. Carregar o Background a partir do arquivo test_bk.txt (se existir)
+# 2. Ler os alvos do test_pos.txt para manter a correspondencia de ordem
+with open(POS_FILE, "r") as f:
+    pos_targets = [line.strip() for line in f if line.strip() and not line.startswith("%")]
+
+# Regex para extrair o host/entidade de um predicado como execCode(internet, host_a).
+host_pattern = re.compile(r"\((?:[^,]+,\s*)?([^,\)]+)\)")
+
+# 3. Carregar o Background
 modes = []
 ok_if_unknown = []
 if BK_FILE.exists():
@@ -27,20 +34,19 @@ if BK_FILE.exists():
 
 background = Background(modes=modes if modes else None, ok_if_unknown=ok_if_unknown)
 
-# 3. Inicializar a estrutura de banco de dados do teste
+# 4. Inicializar o Database do teste
 db = Database.from_files(
     facts=FACTS_FILE,
-    pos=POS_FILE,
+    pos=str(POS_FILE),
     neg=NEG_FILE
 )
 
-# 4. Diretorio raiz com os resultados do Grid Search
+# 5. Mapear o Grid Search
 RESULTS_DIR = Path("~/rdn-boost/results").expanduser()
 grid_pattern = re.compile(r"grid_d(?P<depth>\d+)_e(?P<estimators>\d+)_n(?P<nodesize>\d+)_s(?P<seed>\d+)")
 
 results_data = []
 
-# Funcao para carregar o modelo de cada fold (identica ao seu script anterior)
 def load_fold_model(model_dir, target, n_estimators, max_depth, node_size):
     clf = BoostedRDNClassifier(
         background=background,
@@ -67,7 +73,8 @@ def load_fold_model(model_dir, target, n_estimators, max_depth, node_size):
     clf.estimators_ = estimators
     return clf
 
-# Iterar pelas pastas do Grid Search
+print(f"Iniciando avaliacao para {len(pos_targets)} alvo(s) em test_pos.txt...\n")
+
 for exp_folder in sorted(RESULTS_DIR.glob("grid_*")):
     if not exp_folder.is_dir():
         continue
@@ -91,33 +98,38 @@ for exp_folder in sorted(RESULTS_DIR.glob("grid_*")):
         fold_num = fold_dir.name.replace("fold_", "")
         
         try:
-            # Carrega o classificador e copia as arvores para o file_system local do srlearn
             clf = load_fold_model(fold_dir, "execCode", estimators, depth, node_size)
-            
-            # Executa a predicao
             probs = clf.predict_proba(db)
-            mean_prob = float(np.mean(probs))
+            probs_list = np.asarray(probs, dtype=float).flatten().tolist()
 
-            results_data.append({
-                "experiment": exp_folder.name,
-                "depth": depth,
-                "estimators": estimators,
-                "node_size": node_size,
-                "fold": fold_num,
-                "mean_probability": mean_prob
-            })
-            print(f"[{exp_folder.name}] Fold {fold_num} -> Prob Media: {mean_prob:.4f}")
+            # Mapeia cada consulta para a sua probabilidade individual
+            for target_fact, prob in zip(pos_targets, probs_list):
+                host_match = host_pattern.search(target_fact)
+                host_name = host_match.group(1) if host_match else target_fact
+
+                results_data.append({
+                    "experiment": exp_folder.name,
+                    "depth": depth,
+                    "estimators": estimators,
+                    "node_size": node_size,
+                    "fold": fold_num,
+                    "target_fact": target_fact,
+                    "host": host_name,
+                    "probability": float(prob)
+                })
+
+            print(f"[{exp_folder.name}] Fold {fold_num} processado ({len(probs_list)} alvos).")
 
         except Exception as e:
             print(f"[ERRO] {exp_folder.name} {fold_dir.name}: {e}")
 
-# 5. Salvar consolidado em CSV
-output_csv = RESULTS_DIR / "grid_test_evaluation.csv"
-fieldnames = ["experiment", "depth", "estimators", "node_size", "fold", "mean_probability"]
+# 6. Salvar relatorio detalhado em CSV
+output_csv = RESULTS_DIR / "grid_test_individual_hosts.csv"
+fieldnames = ["experiment", "depth", "estimators", "node_size", "fold", "target_fact", "host", "probability"]
 
 with open(output_csv, mode="w", newline="") as f:
     writer = csv.DictWriter(f, fieldnames=fieldnames)
     writer.writeheader()
     writer.writerows(results_data)
 
-print(f"\n[SUCESSO] Avaliacao concluida! Resultados salvos em: {output_csv}")
+print(f"\n[SUCESSO] Avaliacao individual concluida! Resultados salvos em: {output_csv}")
