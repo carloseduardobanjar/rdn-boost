@@ -1,14 +1,22 @@
 import os
 import re
-import pandas as pd
+import csv
 from pathlib import Path
-from srlearn.rdn import BoostedRDN
+from srlearn.rdn import BoostedRDNClassifier
+from srlearn.database import Database
 
 # 1. Diretorio onde estao os arquivos do seu teste
 TEST_DIR = Path("~/rdn-boost/test").expanduser()
 FACTS_FILE = str(TEST_DIR / "test_facts.txt")
 POS_FILE = str(TEST_DIR / "test_pos.txt")
 BK_FILE = str(TEST_DIR / "test_bk.txt")
+
+# Carregar os dados de teste usando a estrutura Database do srlearn
+test_data = Database.from_files(
+    facts=FACTS_FILE,
+    pos=POS_FILE,
+    bk=BK_FILE
+)
 
 # Diretorio raiz com os resultados do Grid Search
 RESULTS_DIR = Path("~/rdn-boost/results").expanduser()
@@ -43,8 +51,7 @@ for exp_folder in sorted(RESULTS_DIR.glob("grid_*")):
             print(f"[AVISO] Pasta bRDNs nao encontrada em: {bRDNs_dir}")
             continue
 
-        # Configura o estimador apontando para os modelos aprendidos
-        clf = BoostedRDN(
+        clf = BoostedRDNClassifier(
             max_tree_depth=depth,
             n_estimators=estimators,
             node_size=node_size
@@ -52,15 +59,8 @@ for exp_folder in sorted(RESULTS_DIR.glob("grid_*")):
         clf.model_dir_ = str(bRDNs_dir)
 
         try:
-            # Executa a inferencia usando os arquivos da pasta test/
-            # Nota: O srlearn carrega background, facts e exemplos de teste
-            probs = clf.predict_proba(
-                test_facts=FACTS_FILE,
-                test_pos=POS_FILE,
-                background=BK_FILE
-            )
+            probs = clf.predict_proba(test_data)
             
-            # Registra o resultado medio de probabilidade para este fold/experimento
             mean_prob = float(probs.mean())
             
             results_data.append({
@@ -77,9 +77,13 @@ for exp_folder in sorted(RESULTS_DIR.glob("grid_*")):
         except Exception as e:
             print(f"[ERRO] Falha ao processar {exp_folder.name} Fold {fold_num}: {e}")
 
-# Salva a consolidacao em CSV
-df_results = pd.DataFrame(results_data)
+# Salvar consolidado via modulo padrao csv
 output_csv = RESULTS_DIR / "grid_test_evaluation.csv"
-df_results.to_csv(output_csv, index=False)
+fieldnames = ["experiment", "depth", "estimators", "node_size", "fold", "mean_probability"]
+
+with open(output_csv, mode="w", newline="") as f:
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(results_data)
 
 print(f"\n[SUCESSO] Avaliacao concluida! Resultados salvos em: {output_csv}")
