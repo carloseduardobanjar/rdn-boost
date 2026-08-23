@@ -35,3 +35,5 @@ cluster/results_summary.csv
 !cluster/results/.gitkeep
 
 /manual_cases
+/results
+/land_results
