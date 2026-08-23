@@ -8,6 +8,7 @@ from pathlib import Path
 
 MULVAL_MODES = [
     "execCode(+host, +privilege).",
+    "recursive_execCode(`host, +privilege).",
     "principalCompromised(+principal).",
     "hasAccount(+principal, +host, -privilege).",
     "canAccessHost(+host).",
@@ -87,25 +88,27 @@ PRIVILEGES = ["root", "user", "www_data", "mysql", "ftp", "vpn_user"]
 PATHS = ["bin_app", "startup_script", "web_root", "export_share", "mnt_share"]
 RANGES = ["remoteExploit", "localExploit", "remoteClient"]
 CONSEQUENCES = ["privEscalation", "denialOfService", "informationDisclosure"]
-BK_DIRECTIVES = [
-    "okIfUnknown: netAccess/3.",
-    "okIfUnknown: vulExists/5.",
-    "okIfUnknown: accessFile/3.",
-    "okIfUnknown: canAccessFile/4.",
-    "okIfUnknown: canAccessHost/1.",
-    "okIfUnknown: principalCompromised/1.",
-    "okIfUnknown: accessMaliciousInput/3.",
-    "okIfUnknown: logInService/3.",
-    "okIfUnknown: localFileProtection/4.",
-    "okIfUnknown: nfsMounted/5.",
-    "okIfUnknown: nfsExportInfo/4.",
-    "okIfUnknown: dependsOn/3.",
-    "okIfUnknown: bugHyp/4.",
-    "okIfUnknown: inCompetent/1.",
-    "okIfUnknown: competent/1.",
-    "okIfUnknown: isWebServer/1.",
-    "okIfUnknown: advances/2.",
+OK_IF_UNKNOWN_PREDICATES = [
+    "recursive_execCode/2",
+    "netAccess/3",
+    "vulExists/5",
+    "accessFile/3",
+    "canAccessFile/4",
+    "canAccessHost/1",
+    "principalCompromised/1",
+    "accessMaliciousInput/3",
+    "logInService/3",
+    "localFileProtection/4",
+    "nfsMounted/5",
+    "nfsExportInfo/4",
+    "dependsOn/3",
+    "bugHyp/4",
+    "inCompetent/1",
+    "competent/1",
+    "isWebServer/1",
+    "advances/2",
 ]
+BK_DIRECTIVES = [f"okIfUnknown: {predicate}." for predicate in OK_IF_UNKNOWN_PREDICATES]
 
 
 def fact(name, *args):
@@ -850,7 +853,11 @@ def train_cross_validation(args):
 
         train_db = load_database(data_path, train_folds, tmp_dir, f"train_{fold_index}")
         test_db = load_database(data_path, [test_fold], tmp_dir, f"test_{fold_index}")
-        background = Background(modes=MULVAL_MODES)
+        background = Background(
+            modes=MULVAL_MODES,
+            ok_if_unknown=OK_IF_UNKNOWN_PREDICATES,
+            recursion=True,
+        )
 
         clf = BoostedRDNClassifier(
             background=background,
