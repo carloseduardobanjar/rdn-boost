@@ -35,7 +35,10 @@ MULVAL_MODES = [
     "inCompetent(+principal).",
     "competent(+principal).",
     "isWebServer(+host).",
+    "advances(-host, +host).",
     "advances(+host, -host).",
+    "advances(`host, +host).",
+    "hacl(`host, +host, -protocol, -port).",
 ]
 
 
@@ -102,6 +105,7 @@ OK_IF_UNKNOWN_PREDICATES = [
     "nfsMounted/5",
     "nfsExportInfo/4",
     "dependsOn/3",
+    "clientProgram/2",
     "bugHyp/4",
     "inCompetent/1",
     "competent/1",
@@ -237,6 +241,78 @@ def generate_random_primitives(num_hosts, start_index, density):
         add_fact(facts, "hacl", client, server, "nfsProtocol", "nfsPort")
 
     return facts, hosts
+
+
+def generate_attack_chain_primitives(num_hosts, start_index, positives_per_fold, negatives_per_fold):
+    facts = defaultdict(set)
+    target_positives = positives_per_fold or max(12, num_hosts // 10)
+    target_negatives = negatives_per_fold or target_positives
+    hosts = []
+    positive_hosts = []
+    negative_hosts = []
+    host_index = start_index
+    chain_index = 1
+    chain_lengths = [3, 4, 5, 6, 7]
+
+    def next_host(prefix):
+        nonlocal host_index
+        host = f"{prefix}_{host_index}"
+        host_index += 1
+        hosts.append(host)
+        return host
+
+    while len(positive_hosts) < target_positives:
+        chain_len = min(
+            random.choice(chain_lengths),
+            target_positives - len(positive_hosts),
+        )
+        if chain_len <= 0:
+            break
+
+        zone = f"internet_chain_{start_index}_{chain_index}"
+        add_fact(facts, "attackerLocated", zone)
+        previous_host = None
+
+        for step in range(1, chain_len + 1):
+            host = next_host("chain_host")
+            service = "apache"
+            cve = f"cve_chain_{host}"
+            add_fact(facts, "networkServiceInfo", host, service, "tcp", "80", "www_data")
+            add_fact(facts, "installed", host, service)
+            add_fact(facts, "vulExists", host, cve, service)
+            add_fact(facts, "vulProperty", cve, "remoteExploit", "privEscalation")
+
+            if previous_host is None:
+                add_fact(facts, "hacl", zone, host, "tcp", "80")
+            else:
+                add_fact(facts, "advances", previous_host, host)
+                add_fact(facts, "hacl", previous_host, host, "tcp", "80")
+
+            previous_host = host
+            positive_hosts.append(host)
+
+        sink = next_host("chain_sink")
+        add_fact(facts, "advances", previous_host, sink)
+        add_fact(facts, "hacl", previous_host, sink, "tcp", "80")
+        chain_index += 1
+
+    while len(negative_hosts) < target_negatives:
+        decoy = next_host("decoy_host")
+        blocked_source = next_host("blocked_host")
+        decoy_sink = next_host("decoy_sink")
+        service = "apache"
+        cve = f"cve_decoy_{decoy}"
+        add_fact(facts, "networkServiceInfo", decoy, service, "tcp", "80", "www_data")
+        add_fact(facts, "installed", decoy, service)
+        add_fact(facts, "vulExists", decoy, cve, service)
+        add_fact(facts, "vulProperty", cve, "remoteExploit", "privEscalation")
+        add_fact(facts, "advances", blocked_source, decoy)
+        add_fact(facts, "hacl", blocked_source, decoy, "tcp", "80")
+        add_fact(facts, "advances", decoy, decoy_sink)
+        add_fact(facts, "hacl", decoy, decoy_sink, "tcp", "80")
+        negative_hosts.append(decoy)
+
+    return facts, hosts, positive_hosts, negative_hosts
 
 
 def close_mulval_rules(primitive_facts, max_iterations=80):
@@ -443,6 +519,29 @@ def build_examples(facts, hosts, negative_ratio, positives_per_fold=None, negati
     return [fact("execCode", *item) for item in positives], [fact("execCode", *item) for item in negatives]
 
 
+def build_attack_chain_examples(facts, positive_hosts, negative_hosts, positives_per_fold, negatives_per_fold):
+    target_positives = positives_per_fold or len(positive_hosts)
+    target_negatives = negatives_per_fold or len(negative_hosts)
+
+    positive_examples = []
+    for host in positive_hosts:
+        example = (host, "www_data")
+        if example in facts["execCode"]:
+            positive_examples.append(fact("execCode", *example))
+        if len(positive_examples) >= target_positives:
+            break
+
+    negative_examples = []
+    for host in negative_hosts:
+        example = (host, "www_data")
+        if example not in facts["execCode"]:
+            negative_examples.append(fact("execCode", *example))
+        if len(negative_examples) >= target_negatives:
+            break
+
+    return positive_examples, negative_examples
+
+
 def summarize_rule_coverage(positive_examples, exec_code_rules):
     def parse_exec_code_example(example):
         prefix = "execCode("
@@ -505,24 +604,48 @@ def generate_dataset(
     background,
     positives_per_fold=None,
     negatives_per_fold=None,
+    dataset_style="random",
 ):
     required_positives = positives_per_fold if positives_per_fold is not None else min_positives
     required_negatives = negatives_per_fold
 
     for attempt in range(1, 31):
         print(
-            f"Tentativa {attempt}: gerando {num_instances} hosts e aplicando fechamento logico...",
+            f"Tentativa {attempt}: gerando {num_instances} hosts ({dataset_style}) "
+            "e aplicando fechamento logico...",
             flush=True,
         )
-        primitive_facts, hosts = generate_random_primitives(num_instances, start_index, density)
+        if dataset_style == "attack_chain":
+            primitive_facts, hosts, chain_positive_hosts, chain_negative_hosts = (
+                generate_attack_chain_primitives(
+                    num_instances,
+                    start_index,
+                    positives_per_fold,
+                    negatives_per_fold,
+                )
+            )
+        else:
+            primitive_facts, hosts = generate_random_primitives(num_instances, start_index, density)
+            chain_positive_hosts = []
+            chain_negative_hosts = []
+
         closed_facts, exec_code_rules = close_mulval_rules(primitive_facts)
-        positives, negatives = build_examples(
-            closed_facts,
-            hosts,
-            negative_ratio,
-            positives_per_fold,
-            negatives_per_fold,
-        )
+        if dataset_style == "attack_chain":
+            positives, negatives = build_attack_chain_examples(
+                closed_facts,
+                chain_positive_hosts,
+                chain_negative_hosts,
+                positives_per_fold,
+                negatives_per_fold,
+            )
+        else:
+            positives, negatives = build_examples(
+                closed_facts,
+                hosts,
+                negative_ratio,
+                positives_per_fold,
+                negatives_per_fold,
+            )
 
         has_enough_positives = len(positives) >= required_positives
         has_enough_negatives = (
@@ -569,6 +692,7 @@ def generate_folds(
     background,
     positives_per_fold=None,
     negatives_per_fold=None,
+    dataset_style="random",
 ):
     random.seed(seed)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -581,7 +705,7 @@ def generate_folds(
 
         print(
             f"\nGerando fold{fold:02d}: hosts={instances_per_fold}, density={density}, "
-            f"background={background}",
+            f"background={background}, dataset_style={dataset_style}",
             flush=True,
         )
 
@@ -594,6 +718,7 @@ def generate_folds(
             background,
             positives_per_fold,
             negatives_per_fold,
+            dataset_style,
         )
         facts_header = (
             "% --- Primitive MulVAL facts ---"
@@ -837,6 +962,7 @@ def train_cross_validation(args):
             args.background,
             args.positives_per_fold,
             args.negatives_per_fold,
+            args.dataset_style,
         )
 
     fold_names = [f"fold{i:02d}" for i in range(1, args.folds + 1)]
@@ -967,6 +1093,12 @@ def parse_args():
         default="primitive",
         help="primitive salva apenas fatos primitivos; closed inclui derivados intermediarios.",
     )
+    parser.add_argument(
+        "--dataset_style",
+        choices=["random", "attack_chain"],
+        default="random",
+        help="random usa fatos sinteticos gerais; attack_chain gera cadeias multihop para testar recursao.",
+    )
     parser.add_argument("--max_depth", type=int, default=5)
     parser.add_argument("--node_size", type=int, default=3)
     parser.add_argument("--n_estimators", type=int, default=20)
@@ -998,6 +1130,7 @@ def main():
             args.background,
             args.positives_per_fold,
             args.negatives_per_fold,
+            args.dataset_style,
         )
         return
     train_cross_validation(args)

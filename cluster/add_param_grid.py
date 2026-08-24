@@ -12,6 +12,7 @@ FIELDNAMES = [
     "instances_per_fold",
     "density",
     "background",
+    "dataset_style",
     "positives_per_fold",
     "negatives_per_fold",
     "max_depth",
@@ -47,6 +48,7 @@ def build_rows(args):
                 "instances_per_fold": args.instances_per_fold,
                 "density": args.density,
                 "background": args.background,
+                "dataset_style": args.dataset_style,
                 "positives_per_fold": args.positives_per_fold,
                 "negatives_per_fold": args.negatives_per_fold,
                 "max_depth": max_depth,
@@ -89,6 +91,7 @@ def parse_args():
     parser.add_argument("--instances_per_fold", type=int, default=1500)
     parser.add_argument("--density", type=float, default=1.3)
     parser.add_argument("--background", default="primitive")
+    parser.add_argument("--dataset_style", default="random")
     parser.add_argument("--positives_per_fold", type=int, default=75)
     parser.add_argument("--negatives_per_fold", type=int, default=75)
     parser.add_argument("--threshold", type=float, default=0.38)

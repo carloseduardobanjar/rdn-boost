@@ -51,6 +51,7 @@ def collect_result(result_dir, target_threshold=None):
         "negatives_per_fold": config.get("negatives_per_fold", ""),
         "density": config.get("density", ""),
         "background": config.get("background", ""),
+        "dataset_style": config.get("dataset_style", "random"),
         "max_depth": config.get("max_depth", ""),
         "node_size": config.get("node_size", ""),
         "n_estimators": config.get("n_estimators", ""),

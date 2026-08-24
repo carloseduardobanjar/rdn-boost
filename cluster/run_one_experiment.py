@@ -84,6 +84,8 @@ def build_train_command(row, repo_root, result_dir):
         str(as_float(row, "density")),
         "--background",
         row["background"],
+        "--dataset_style",
+        row.get("dataset_style") or "random",
         "--positives_per_fold",
         str(as_int(row, "positives_per_fold")),
         "--negatives_per_fold",
