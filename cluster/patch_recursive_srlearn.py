@@ -226,7 +226,7 @@ def _parse_results_db(results_db):
                 values = [
                     float(value)
                     for value in re.findall(
-                        r"[-+]?(?:\\\\d*\\\\.\\\\d+|\\\\d+)(?:[eE][-+]?\\\\d+)?",
+                        r"[-+]?(?:\d*\.\d+|\d+)(?:[eE][-+]?\d+)?",
                         probability_text,
                     )
                 ]
@@ -238,7 +238,7 @@ def _parse_results_db(results_db):
                 probability = values[0] if is_negative_literal else values[-1]
             else:
                 match = re.search(
-                    r"[-+]?(?:\\\\d*\\\\.\\\\d+|\\\\d+)(?:[eE][-+]?\\\\d+)?",
+                    r"[-+]?(?:\d*\.\d+|\d+)(?:[eE][-+]?\d+)?",
                     probability_text,
                 )
                 if not match:
@@ -275,6 +275,10 @@ def patch_jar(srlearn_dir: Path) -> None:
     jar_path = srlearn_dir / "BoostSRL.jar"
     if not jar_path.exists():
         raise SystemExit(f"BoostSRL.jar nao encontrado em {jar_path}")
+    if shutil.which("javac") is None:
+        print("javac nao encontrado; pulando patch do JAR.")
+        print("Garanta que BoostSRL.jar ja foi copiado corrigido para a .venv.")
+        return
 
     backup = jar_path.with_suffix(".jar.before_recursive_prob_patch")
     if not backup.exists():
@@ -307,7 +311,15 @@ def patch_rdn_py(srlearn_dir: Path) -> None:
     if not backup.exists():
         backup.write_text(text)
 
-    if "def _parse_results_db(results_db):" not in text:
+    if "def _parse_results_db(results_db):" in text:
+        text = re.sub(
+            r"def _parse_results_db\(results_db\):\n.*?\n(?=class BoostedRDNClassifier)",
+            lambda _match: PARSER_HELPER,
+            text,
+            count=1,
+            flags=re.DOTALL,
+        )
+    else:
         marker = "warnings.simplefilter(\"default\")\n\n\n"
         text = text.replace(marker, marker + PARSER_HELPER, 1)
 
