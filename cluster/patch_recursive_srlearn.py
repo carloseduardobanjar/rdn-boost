@@ -339,6 +339,7 @@ def patch_rdn_py(srlearn_dir: Path) -> None:
         count=1,
         flags=re.DOTALL,
     )
+    text = text.replace(r"\d\*\\.\d+", r"\d*\.\d+")
     text = text.replace(LOADTXT_BLOCK, "        _classes, _results = _parse_results_db(_results_db)\n")
 
     rdn_path.write_text(text)
