@@ -659,9 +659,9 @@ def generate_dataset(
             for name, values in primitive_facts.items():
                 background_facts[name].update(values)
 
-            if background == "closed":
+            if background in {"closed", "closed_with_execCode"}:
                 for name, values in closed_facts.items():
-                    if name != "execCode":
+                    if name != "execCode" or background == "closed_with_execCode":
                         background_facts[name].update(values)
                 if "vulExists5" in background_facts:
                     background_facts["vulExists"].update(background_facts.pop("vulExists5"))
@@ -1089,9 +1089,12 @@ def parse_args():
     )
     parser.add_argument(
         "--background",
-        choices=["primitive", "closed"],
+        choices=["primitive", "closed", "closed_with_execCode"],
         default="primitive",
-        help="primitive salva apenas fatos primitivos; closed inclui derivados intermediarios.",
+        help=(
+            "primitive salva apenas fatos primitivos; closed inclui derivados "
+            "intermediarios; closed_with_execCode inclui tambem execCode derivado."
+        ),
     )
     parser.add_argument(
         "--dataset_style",
