@@ -27,25 +27,20 @@ STAGES = {
     "prior_intermediate_grid12": {
         "prefix": "prior_mid",
         "background": "closed",
-        "memory_extra_mb": 600,
     },
     "prior_exec_closed_grid12": {
         "prefix": "prior_exec",
         "background": "closed_with_execCode",
-        "memory_extra_mb": 800,
     },
 }
 
 
-def memory_for(max_depth, node_size, n_estimators, extra_mb):
-    base = 1800
-    if max_depth >= 5 or n_estimators >= 30:
-        base = 2200
+def memory_for(max_depth, node_size, n_estimators):
     if max_depth >= 5 and n_estimators >= 30:
-        base = 2400
-    if node_size >= 3:
-        base += 200
-    return f"{base + extra_mb}MB"
+        return "2200MB"
+    if max_depth >= 5 or n_estimators >= 30:
+        return "2000MB"
+    return "1800MB"
 
 
 def read_existing(path):
@@ -91,12 +86,7 @@ def build_rows(args):
                     "node_size": node_size,
                     "n_estimators": n_estimators,
                     "threshold": args.threshold,
-                    "request_memory": memory_for(
-                        max_depth,
-                        node_size,
-                        n_estimators,
-                        config["memory_extra_mb"],
-                    ),
+                    "request_memory": memory_for(max_depth, node_size, n_estimators),
                 }
             )
     return rows
