@@ -114,6 +114,49 @@ OK_IF_UNKNOWN_PREDICATES = [
 ]
 BK_DIRECTIVES = [f"okIfUnknown: {predicate}." for predicate in OK_IF_UNKNOWN_PREDICATES]
 
+INTERMEDIATE_PRIOR_RULES = [
+    "vulExists(H, VulID, Software, Range, Consequence) :-",
+    "    vulExists(H, VulID, Software),",
+    "    vulProperty(VulID, Range, Consequence).",
+    "",
+    "vulExists(H, VulID, Software, Range, Consequence) :-",
+    "    vulExists(H, VulID, Library, Range, Consequence),",
+    "    dependsOn(H, Software, Library).",
+    "",
+    "logInService(H, Protocol, Port) :-",
+    "    networkServiceInfo(H, sshd, Protocol, Port, _Privilege).",
+    "",
+    "logInService(H, Protocol, Port) :-",
+    "    networkServiceInfo(H, vpnService, Protocol, Port, _Privilege).",
+    "",
+    "netAccess(H, Protocol, Port) :-",
+    "    attackerLocated(Zone),",
+    "    hacl(Zone, H, Protocol, Port).",
+    "",
+    "netAccess(H, Protocol, Port) :-",
+    "    attackerLocated(H),",
+    "    networkServiceInfo(H, _Software, Protocol, Port, _Privilege).",
+    "",
+    "canAccessHost(H) :-",
+    "    logInService(H, Protocol, Port),",
+    "    netAccess(H, Protocol, Port).",
+]
+
+EXEC_CODE_PRIOR_RULES = [
+    "execCode(H, Perm) :-",
+    "    vulExists(H, _VulID, Software, remoteExploit, privEscalation),",
+    "    networkServiceInfo(H, Software, Protocol, Port, Perm),",
+    "    netAccess(H, Protocol, Port).",
+]
+
+
+def prior_rule_lines(background):
+    if background == "prior_rules":
+        return INTERMEDIATE_PRIOR_RULES
+    if background == "prior_rules_with_execCode":
+        return [*INTERMEDIATE_PRIOR_RULES, "", *EXEC_CODE_PRIOR_RULES]
+    return []
+
 
 def fact(name, *args):
     return f"{name}({', '.join(str(arg) for arg in args)})."
@@ -667,7 +710,10 @@ def generate_dataset(
                     background_facts["vulExists"].update(background_facts.pop("vulExists5"))
 
             coverage = summarize_rule_coverage(positives, exec_code_rules)
-            return serialize_facts(background_facts), positives, negatives, coverage
+            return [
+                *prior_rule_lines(background),
+                *serialize_facts(background_facts),
+            ], positives, negatives, coverage
 
         print(
             f"Tentativa {attempt}: {len(positives)} positivos e {len(negatives)} negativos; "
@@ -720,11 +766,13 @@ def generate_folds(
             negatives_per_fold,
             dataset_style,
         )
-        facts_header = (
-            "% --- Primitive MulVAL facts ---"
-            if background == "primitive"
-            else "% --- Primitive + derived MulVAL facts ---"
-        )
+        facts_header = {
+            "primitive": "% --- Primitive MulVAL facts ---",
+            "closed": "% --- Primitive + derived MulVAL facts, without execCode ---",
+            "closed_with_execCode": "% --- Primitive + derived MulVAL facts, including execCode ---",
+            "prior_rules": "% --- Primitive facts + a priori intermediate rules ---",
+            "prior_rules_with_execCode": "% --- Primitive facts + a priori intermediate and execCode rules ---",
+        }[background]
         write_lines(
             fold_dir / "facts.pl",
             [facts_header, *BK_DIRECTIVES, *facts],
@@ -1089,11 +1137,19 @@ def parse_args():
     )
     parser.add_argument(
         "--background",
-        choices=["primitive", "closed", "closed_with_execCode"],
+        choices=[
+            "primitive",
+            "closed",
+            "closed_with_execCode",
+            "prior_rules",
+            "prior_rules_with_execCode",
+        ],
         default="primitive",
         help=(
             "primitive salva apenas fatos primitivos; closed inclui derivados "
-            "intermediarios; closed_with_execCode inclui tambem execCode derivado."
+            "intermediarios; closed_with_execCode inclui tambem execCode derivado; "
+            "prior_rules injeta regras intermediarias; prior_rules_with_execCode "
+            "injeta tambem regras para execCode."
         ),
     )
     parser.add_argument(

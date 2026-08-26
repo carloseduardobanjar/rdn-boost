@@ -25,12 +25,12 @@ FIELDNAMES = [
 
 STAGES = {
     "prior_intermediate_grid12": {
-        "prefix": "prior_mid",
-        "background": "closed",
+        "prefix": "prior_rule_mid",
+        "background": "prior_rules",
     },
-    "prior_exec_closed_grid12": {
-        "prefix": "prior_exec",
-        "background": "closed_with_execCode",
+    "prior_exec_rules_grid12": {
+        "prefix": "prior_rule_exec",
+        "background": "prior_rules_with_execCode",
     },
 }
 
@@ -94,7 +94,7 @@ def build_rows(args):
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Adiciona jobs com conhecimento a priori derivado pelo fechamento MulVAL-like."
+        description="Adiciona jobs com regras a priori MulVAL-like no background."
     )
     parser.add_argument("--manifest", default="cluster/experiments.csv")
     parser.add_argument(
