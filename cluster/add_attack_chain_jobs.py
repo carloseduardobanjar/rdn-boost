@@ -13,6 +13,7 @@ FIELDNAMES = [
     "density",
     "background",
     "dataset_style",
+    "mode_profile",
     "positives_per_fold",
     "negatives_per_fold",
     "max_depth",
@@ -63,6 +64,7 @@ def build_rows(args):
                 "density": args.density,
                 "background": "primitive",
                 "dataset_style": "attack_chain",
+                "mode_profile": args.mode_profile,
                 "positives_per_fold": args.positives_per_fold,
                 "negatives_per_fold": args.negatives_per_fold,
                 "max_depth": max_depth,
@@ -82,6 +84,11 @@ def parse_args():
     parser.add_argument("--manifest", default="cluster/experiments.csv")
     parser.add_argument("--stage", default="recursive_attack_chain")
     parser.add_argument("--job_prefix", default="rec_chain")
+    parser.add_argument(
+        "--mode_profile",
+        choices=["full", "no_successor_evidence"],
+        default="full",
+    )
     parser.add_argument("--seed", type=int, default=7)
     parser.add_argument("--folds", type=int, default=5)
     parser.add_argument("--instances_per_fold", type=int, default=500)

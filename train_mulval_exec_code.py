@@ -41,6 +41,16 @@ MULVAL_MODES = [
     "hacl(`host, +host, -protocol, -port).",
 ]
 
+NO_SUCCESSOR_EVIDENCE_MODES = [
+    mode
+    for mode in MULVAL_MODES
+    if mode
+    not in {
+        "advances(+host, -host).",
+        "hacl(+host, -host, -protocol, -port).",
+    }
+]
+
 
 SERVICES = {
     "apache": {
@@ -808,7 +818,13 @@ def merge_files(input_files, output_file):
             outfile.write("\n")
 
 
-def load_database(data_path, fold_names, tmp_dir, prefix):
+def select_modes(mode_profile):
+    if mode_profile == "no_successor_evidence":
+        return NO_SUCCESSOR_EVIDENCE_MODES
+    return MULVAL_MODES
+
+
+def load_database(data_path, fold_names, tmp_dir, prefix, modes=None):
     from srlearn import Database
 
     pos_files = [data_path / fold / "pos.pl" for fold in fold_names]
@@ -824,7 +840,7 @@ def load_database(data_path, fold_names, tmp_dir, prefix):
     merge_files(fact_files, merged_facts)
 
     db = Database.from_files(str(merged_pos), str(merged_neg), str(merged_facts))
-    db.modes = MULVAL_MODES
+    db.modes = modes or MULVAL_MODES
     return db
 
 
@@ -1025,10 +1041,11 @@ def train_cross_validation(args):
         print(f"Treino: {train_folds}")
         print(f"Teste : {test_fold}")
 
-        train_db = load_database(data_path, train_folds, tmp_dir, f"train_{fold_index}")
-        test_db = load_database(data_path, [test_fold], tmp_dir, f"test_{fold_index}")
+        modes = select_modes(args.mode_profile)
+        train_db = load_database(data_path, train_folds, tmp_dir, f"train_{fold_index}", modes)
+        test_db = load_database(data_path, [test_fold], tmp_dir, f"test_{fold_index}", modes)
         background = Background(
-            modes=MULVAL_MODES,
+            modes=modes,
             ok_if_unknown=OK_IF_UNKNOWN_PREDICATES,
             recursion=True,
         )
@@ -1161,6 +1178,15 @@ def parse_args():
     parser.add_argument("--max_depth", type=int, default=5)
     parser.add_argument("--node_size", type=int, default=3)
     parser.add_argument("--n_estimators", type=int, default=20)
+    parser.add_argument(
+        "--mode_profile",
+        choices=["full", "no_successor_evidence"],
+        default="full",
+        help=(
+            "full usa todos os modos; no_successor_evidence remove modos que "
+            "permitem usar sucessores do host atual como evidencia."
+        ),
+    )
     parser.add_argument("--threshold", type=float, default=0.5)
     parser.add_argument(
         "--generate",

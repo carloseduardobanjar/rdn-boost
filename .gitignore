@@ -29,6 +29,7 @@ cluster/log/*
 cluster/out/*
 cluster/results/*
 cluster/results_summary.csv
+cluster/condor_payload.tar.gz
 !cluster/error/.gitkeep
 !cluster/log/.gitkeep
 !cluster/out/.gitkeep

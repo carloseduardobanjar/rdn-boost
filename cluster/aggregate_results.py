@@ -52,6 +52,7 @@ def collect_result(result_dir, target_threshold=None):
         "density": config.get("density", ""),
         "background": config.get("background", ""),
         "dataset_style": config.get("dataset_style", "random"),
+        "mode_profile": config.get("mode_profile", "full"),
         "max_depth": config.get("max_depth", ""),
         "node_size": config.get("node_size", ""),
         "n_estimators": config.get("n_estimators", ""),

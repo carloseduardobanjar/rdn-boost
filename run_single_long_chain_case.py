@@ -14,6 +14,7 @@ from train_mulval_exec_code import (
     add_fact,
     close_mulval_rules,
     fact,
+    select_modes,
     serialize_facts,
 )
 
@@ -21,11 +22,15 @@ from train_mulval_exec_code import (
 PRIVILEGE = "www_data"
 
 
-def build_chain_facts(length):
+def build_chain_facts(length, break_positions=None):
+    break_positions = set(break_positions or [])
     facts = defaultdict(set)
     add_fact(facts, "attackerLocated", "internet_1")
 
     for index in range(1, length + 1):
+        if index in break_positions:
+            continue
+
         host = f"target_host_{index:02d}"
         cve = f"cve_target_host_{index:02d}_apache"
         add_fact(facts, "networkServiceInfo", host, "apache", "tcp", "80", PRIVILEGE)
@@ -36,6 +41,8 @@ def build_chain_facts(length):
         if index == 1:
             add_fact(facts, "hacl", "internet_1", host, "tcp", "80")
         else:
+            if index - 1 in break_positions:
+                continue
             previous = f"target_host_{index - 1:02d}"
             add_fact(facts, "advances", previous, host)
             add_fact(facts, "hacl", previous, host, "tcp", "80")
@@ -131,13 +138,13 @@ def read_model_tree_count(fold_dir):
     return len(list(trees_dir.glob("execCodeTree*.tree")))
 
 
-def load_fold_model(fold_dir, max_depth, node_size):
+def load_fold_model(fold_dir, max_depth, node_size, modes):
     from srlearn import Background
     from srlearn.rdn import BoostedRDNClassifier
 
     n_estimators = read_model_tree_count(fold_dir)
     background = Background(
-        modes=MULVAL_MODES,
+        modes=modes,
         ok_if_unknown=OK_IF_UNKNOWN_PREDICATES,
         recursion=True,
     )
@@ -182,7 +189,7 @@ def read_query_examples(case_dir):
     return rows
 
 
-def run_predictions(case_dir, model_output, max_depth, node_size):
+def run_predictions(case_dir, model_output, max_depth, node_size, modes):
     from srlearn import Database
 
     db = Database.from_files(
@@ -190,12 +197,13 @@ def run_predictions(case_dir, model_output, max_depth, node_size):
         neg=str(case_dir / "query_neg.pl"),
         facts=str(case_dir / "facts.pl"),
     )
+    db.modes = modes
 
     fold_dirs = sorted(path for path in model_output.glob("fold_*") if path.is_dir())
     query_examples = read_query_examples(case_dir)
     rows = []
     for fold_dir in fold_dirs:
-        clf = load_fold_model(fold_dir, max_depth, node_size)
+        clf = load_fold_model(fold_dir, max_depth, node_size, modes)
         probabilities = np.asarray(clf.predict_proba(db), dtype=float).tolist()
 
         results_dir = case_dir / f"results_{fold_dir.name}"
@@ -280,10 +288,25 @@ def parse_args():
     parser.add_argument("--max_depth", type=int, default=3)
     parser.add_argument("--node_size", type=int, default=2)
     parser.add_argument(
+        "--mode_profile",
+        choices=["full", "no_successor_evidence"],
+        default="full",
+        help="Perfil de modos usado pelo modelo treinado.",
+    )
+    parser.add_argument(
         "--skip_positions",
         action="append",
         default=[],
         help="Posicoes da cadeia a remover das consultas. Aceita valores como 13 ou 10-13.",
+    )
+    parser.add_argument(
+        "--break_positions",
+        action="append",
+        default=[],
+        help=(
+            "Posicoes da cadeia a remover dos fatos, quebrando as arestas ao redor. "
+            "Aceita valores como 13 ou 10-13."
+        ),
     )
     return parser.parse_args()
 
@@ -293,10 +316,12 @@ def main():
     case_dir = Path(args.case_dir)
     model_output = Path(args.model_output)
     skip_positions = parse_positions(args.skip_positions)
+    break_positions = parse_positions(args.break_positions)
+    modes = select_modes(args.mode_profile)
 
-    facts = build_chain_facts(args.length)
+    facts = build_chain_facts(args.length, break_positions)
     write_case_files(case_dir, facts, args.length, skip_positions)
-    rows = run_predictions(case_dir, model_output, args.max_depth, args.node_size)
+    rows = run_predictions(case_dir, model_output, args.max_depth, args.node_size, modes)
     predictions_path, summary_path = write_outputs(case_dir, rows)
 
     print(f"Caso salvo em: {case_dir}")

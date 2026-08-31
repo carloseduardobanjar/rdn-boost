@@ -100,6 +100,8 @@ def build_train_command(row, repo_root, result_dir):
         str(as_float(row, "threshold")),
         "--seed",
         str(as_int(row, "seed")),
+        "--mode_profile",
+        row.get("mode_profile") or "full",
     ]
 
 

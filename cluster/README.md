@@ -142,6 +142,60 @@ python cluster/aggregate_results.py \
   --output results_summary_param_grid27.csv
 ```
 
+## 5.2. Submeter cadeias sem evidencia de sucessor
+
+Esta stage treina em `attack_chain`, cujas cadeias positivas têm tamanho entre 3 e 7 hosts, removendo os modos que permitem usar sucessores do host atual como evidencia:
+
+```text
+advances(+host, -host)
+hacl(+host, -host, -protocol, -port)
+```
+
+Grade:
+
+```text
+max_depth = 3, 4
+n_estimators = 20, 30
+node_size = 2
+```
+
+Gerar/atualizar os jobs:
+
+```bash
+python cluster/add_attack_chain_jobs.py \
+  --stage no_successor_attack_chain \
+  --job_prefix no_succ_chain \
+  --mode_profile no_successor_evidence \
+  --depths 3 4 \
+  --estimators 20 30 \
+  --node_sizes 2 \
+  --instances_per_fold 500 \
+  --positives_per_fold 120 \
+  --negatives_per_fold 120 \
+  --seed 7
+```
+
+Submeter com transferencia:
+
+```bash
+./cluster/make_condor_payload.sh
+
+python cluster/make_submit.py \
+  --stage no_successor_attack_chain \
+  --transfer \
+  --output cluster/rdn_boost_no_successor_attack_chain_transfer.sub
+
+condor_submit cluster/rdn_boost_no_successor_attack_chain_transfer.sub
+```
+
+Depois que terminar:
+
+```bash
+python cluster/aggregate_results.py \
+  --results_root results \
+  --output results_summary_no_successor_attack_chain.csv
+```
+
 ## 6. Configurações atuais
 
 As configurações ficam em:
